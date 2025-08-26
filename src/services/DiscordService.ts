@@ -47,13 +47,17 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // Authenticate with Discord
+      // Authenticate with Discord with timeout
       console.log('🔐 Authenticating with Discord...');
-      const authResponse = await this.sdk.commands.authenticate({});
-
+      const authPromise = this.sdk.commands.authenticate({});
+      const authTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Discord authentication timeout after 15 seconds')), 15000)
+      );
+      
+      const authResponse = await Promise.race([authPromise, authTimeout]) as any;
       console.log('✅ Authentication successful:', authResponse);
 
-      if (authResponse.user) {
+      if (authResponse && authResponse.user) {
         this.currentUser = {
           id: authResponse.user.id,
           username: authResponse.user.username,
@@ -78,14 +82,21 @@ export class DiscordService extends EventEmitter {
 
     } catch (error) {
       console.error('❌ Discord initialization failed:', error);
+      console.error('Error details:', {
+        name: (error as Error).name,
+        message: (error as Error).message,
+        stack: (error as Error).stack
+      });
       
       if (this.config.forceDiscordMode) {
         console.error('❌ Force Discord mode was enabled but authentication failed');
-        console.error('Check that:');
-        console.error('- Your Discord app is configured correctly');
-        console.error('- The client ID is correct');
-        console.error('- The app has proper redirect URLs set up');
       }
+      
+      console.error('Debugging info:');
+      console.error('- Current URL:', window.location.href);
+      console.error('- User Agent:', navigator.userAgent);
+      console.error('- Discord SDK available:', typeof window !== 'undefined' && 'DiscordSDK' in window);
+      console.error('- Client ID:', this.config.clientId);
       
       // Fallback to demo mode
       console.log('🔧 Falling back to demo mode due to Discord auth failure');
