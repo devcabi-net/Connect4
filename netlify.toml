@@ -12,6 +12,5 @@
 
 [context.production.environment]
   VITE_DISCORD_CLIENT_ID = "1407945986424307713"
-  # Add your actual Discord Client ID here when you have it
-  # VITE_SUPABASE_URL = "your_supabase_url_here"
-  # VITE_SUPABASE_ANON_KEY = "your_supabase_key_here"
+  VITE_SUPABASE_URL = "https://uncywyqqgqwrkgjllkna.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuY3l3eXFxZ3F3cmtnamxsa25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMTgyMjcsImV4cCI6MjA3MTc5NDIyN30.96ZkUuEMvupBcEG-FtxK0zb6jIOdpfpXwBWUSBu0Ooo"
