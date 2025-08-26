@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Game Hub - Play Games with Friends</title>
+    
+    <!-- Discord Embedded App SDK -->
+    <script src="https://discord.com/api/embed/sdk.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Meta tags for Discord -->
+    <meta property="og:title" content="Discord Game Hub">
+    <meta property="og:description" content="Play Connect 4 and other board games with friends in Discord voice channels!">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://your-domain.com/preview.png">
+    
+    <!-- Theme colors -->
+    <meta name="theme-color" content="#5865F2">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        /* Critical CSS for loading screen */
+        body { 
+            margin: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .initial-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+        }
+        
+        .initial-loading-content {
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+        
+        .initial-loading h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff 0%, #a8d8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .initial-loading p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 32px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            margin: 0 auto;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-B4jTYd3-.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BeC3kgAH.css">
+  <script type="module">import.meta.url;import("_").catch(()=>1);(async function*(){})().next();if(location.protocol!="file:"){window.__vite_is_modern_browser=true}</script>
+  <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
+</head>
+<body>
+    <!-- Initial loading screen while app loads -->
+    <div id="initial-loading" class="initial-loading">
+        <div class="initial-loading-content">
+            <h1>🎮 Discord Game Hub</h1>
+            <p>Loading your gaming experience...</p>
+            <div class="spinner"></div>
+        </div>
+    </div>
+    
+    <!-- Main app container -->
+    <div id="app">
+        <!-- App content will be inserted here by TypeScript -->
+    </div>
+    
+    <!-- Development/Debug Info (only in dev mode) -->
+    <div id="debug-info" style="display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">
+        <div>Environment: <span id="debug-env">production</span></div>
+        <div>Discord: <span id="debug-discord">unknown</span></div>
+        <div>Version: <span id="debug-version">1.0.0</span></div>
+    </div>
+    
+    <!-- Error fallback for old browsers -->
+    <noscript>
+        <div style="padding: 40px; text-align: center; background: rgba(0,0,0,0.1);">
+            <h2>⚠️ JavaScript Required</h2>
+            <p>This Discord Activity requires JavaScript to run. Please enable JavaScript in your browser and refresh the page.</p>
+        </div>
+    </noscript>
+    
+    
+    <script>
+        // Hide initial loading screen once app is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            // Add small delay to ensure smooth transition
+            setTimeout(() => {
+                const loading = document.getElementById('initial-loading');
+                if (loading) {
+                    loading.style.opacity = '0';
+                    loading.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        loading.remove();
+                    }, 500);
+                }
+            }, 1500);
+        });
+        
+        // Development debug info
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const debugInfo = document.getElementById('debug-info');
+            const debugEnv = document.getElementById('debug-env');
+            if (debugInfo && debugEnv) {
+                debugInfo.style.display = 'block';
+                debugEnv.textContent = 'development';
+            }
+        }
+        
+        // Global error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            
+            // Show user-friendly error message
+            const app = document.getElementById('app');
+            if (app && app.innerHTML === '') {
+                app.innerHTML = `
+                    <div style="
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        min-height: 100vh; 
+                        text-align: center;
+                        padding: 20px;
+                    ">
+                        <div style="
+                            background: rgba(255, 255, 255, 0.1); 
+                            padding: 40px; 
+                            border-radius: 12px; 
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            max-width: 400px;
+                        ">
+                            <h2 style="margin-bottom: 16px;">⚠️ Something went wrong</h2>
+                            <p style="margin-bottom: 24px; color: rgba(255, 255, 255, 0.9);">
+                                Unable to load the game hub. This might be a temporary issue.
+                            </p>
+                            <button onclick="location.reload()" style="
+                                background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+                                color: white;
+                                border: none;
+                                padding: 12px 24px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 14px;
+                                font-weight: 500;
+                            ">
+                                🔄 Reload Page
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        // Unhandled promise rejection handling
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            e.preventDefault();
+        });
+    </script>
+  <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
+  <script nomodule crossorigin id="vite-legacy-polyfill" src="/assets/polyfills-legacy-DJ0SzpWN.js"></script>
+  <script nomodule crossorigin id="vite-legacy-entry" data-src="/assets/index-legacy-Loc_Uo0H.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+</body>
+</html>
