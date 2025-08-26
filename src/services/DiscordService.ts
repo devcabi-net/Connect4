@@ -47,9 +47,27 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // Authenticate with Discord with timeout
-      console.log('🔐 Authenticating with Discord...');
-      const authPromise = this.sdk.commands.authenticate({});
+      // Step 1: Authorize the application (triggers authorization dialog)
+      console.log('🔐 Step 1: Authorizing with Discord...');
+      const authorizePromise = this.sdk.commands.authorize({
+        client_id: this.config.clientId,
+        response_type: 'code',
+        state: '',
+        prompt: 'none',
+        scope: this.config.scopes,
+      });
+      const authorizeTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Discord authorization timeout after 15 seconds')), 15000)
+      );
+      
+      const authorizeResponse = await Promise.race([authorizePromise, authorizeTimeout]) as any;
+      console.log('✅ Authorization successful:', authorizeResponse);
+
+      // Step 2: Authenticate with the authorization code
+      console.log('🔐 Step 2: Authenticating with Discord...');
+      const authPromise = this.sdk.commands.authenticate({
+        access_token: authorizeResponse.access_token,
+      });
       const authTimeout = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Discord authentication timeout after 15 seconds')), 15000)
       );
@@ -131,7 +149,8 @@ export class DiscordService extends EventEmitter {
       const urlParams = new URLSearchParams(window.location.search);
       
       // Primary check: Discord SDK is available
-      const hasDiscordSDK = typeof window !== 'undefined' && 'DiscordSDK' in window;
+      const hasDiscordSDK = typeof window !== 'undefined' && 
+                           ('DiscordSDK' in window || this.sdk !== null);
       
       // Secondary checks: Discord-specific parameters
       const hasDiscordFrameId = urlParams.has('frame_id');
@@ -157,11 +176,18 @@ export class DiscordService extends EventEmitter {
       // Discord Activity specific checks
       const hasDiscordActivity = urlParams.has('activity_id') || urlParams.has('application_id');
       
+      // Check for discordsays.com domain (Discord Activity URLs)
+      const isDiscordSaysDomain = window.location.hostname.includes('discordsays.com');
+      
+      // Check for launch_id (Activity launch parameter)
+      const hasLaunchId = urlParams.has('launch_id');
+      
       // Return true if ANY Discord indicator is present
       const isDiscord = hasDiscordSDK || hasDiscordFrameId || hasDiscordInstanceId || 
                        hasDiscordChannelId || hasDiscordGuildId || isInDiscordFrame || 
                        hasClientId || hasDiscordUserAgent || hasDiscordReferrer || 
-                       hasDiscordAncestor || hasDiscordActivity;
+                       hasDiscordAncestor || hasDiscordActivity || isDiscordSaysDomain || 
+                       hasLaunchId;
       
       console.log('🔍 Discord Detection Results:', {
         url: window.location.href,
@@ -176,6 +202,8 @@ export class DiscordService extends EventEmitter {
         hasClientId,
         hasDiscordUserAgent,
         hasDiscordActivity,
+        isDiscordSaysDomain,
+        hasLaunchId,
         forceMode: this.config.forceDiscordMode,
         finalResult: isDiscord
       });
