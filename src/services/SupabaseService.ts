@@ -16,6 +16,16 @@ export class SupabaseService extends EventEmitter {
   constructor(config?: SupabaseConfig) {
     super();
     
+    // Check if running in Discord Activity (which has CSP restrictions)
+    const isDiscordActivity = window.location.hostname.includes('discordsays.com') ||
+                              window.location.search.includes('frame_id');
+    
+    if (isDiscordActivity) {
+      console.warn('🔧 Running in Discord Activity - Supabase disabled due to CSP restrictions');
+      this.client = null as any;
+      return;
+    }
+    
     // Use environment variables or fallback to demo/local config
     const supabaseUrl = config?.url || import.meta.env.VITE_SUPABASE_URL || '';
     const supabaseAnonKey = config?.anonKey || import.meta.env.VITE_SUPABASE_ANON_KEY || '';

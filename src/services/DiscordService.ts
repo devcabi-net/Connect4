@@ -65,9 +65,8 @@ export class DiscordService extends EventEmitter {
 
       // Step 2: Authenticate with the authorization code
       console.log('🔐 Step 2: Authenticating with Discord...');
-      const authPromise = this.sdk.commands.authenticate({
-        access_token: authorizeResponse.access_token,
-      });
+      console.log('Authorize response details:', authorizeResponse);
+      const authPromise = this.sdk.commands.authenticate({});
       const authTimeout = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Discord authentication timeout after 15 seconds')), 15000)
       );
