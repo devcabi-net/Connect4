@@ -69,11 +69,18 @@ export class GameHub extends EventEmitter {
   async initialize(): Promise<boolean> {
     try {
       console.log('🚀 Initializing Game Hub...');
+      console.log('Environment Check:', {
+        discordClientId: import.meta.env.VITE_DISCORD_CLIENT_ID ? 'Set' : 'Not Set',
+        supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Not Set',
+        forceDiscordMode: import.meta.env.VITE_FORCE_DISCORD_MODE
+      });
       
       // Initialize Supabase (multiplayer backend)
+      console.log('🔗 Initializing Supabase backend...');
       const supabaseConnected = await this.supabaseService.initialize();
       
       // Initialize Discord connection
+      console.log('🎮 Initializing Discord service...');
       const discordConnected = await this.discordService.initialize();
       
       console.log(`✅ Game Hub initialized (Discord: ${discordConnected ? 'Connected' : 'Demo Mode'}, Backend: ${supabaseConnected ? 'Supabase' : 'Local Only'})`);

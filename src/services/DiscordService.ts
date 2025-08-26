@@ -48,9 +48,8 @@ export class DiscordService extends EventEmitter {
       console.log('✅ Discord SDK ready');
 
       // Authenticate with Discord
-      const authResponse = await this.sdk.commands.authenticate({
-        access_token: null,
-      });
+      console.log('🔐 Authenticating with Discord...');
+      const authResponse = await this.sdk.commands.authenticate({});
 
       console.log('✅ Authentication successful:', authResponse);
 
@@ -113,6 +112,10 @@ export class DiscordService extends EventEmitter {
 
   private isRunningInDiscord(): boolean {
     try {
+      console.log('🔍 Starting Discord detection...');
+      console.log('Current URL:', window.location.href);
+      console.log('User Agent:', navigator.userAgent);
+      
       // Check multiple Discord indicators
       const urlParams = new URLSearchParams(window.location.search);
       
@@ -127,9 +130,11 @@ export class DiscordService extends EventEmitter {
       
       // Tertiary check: Running in Discord iframe
       const isInDiscordFrame = typeof window !== 'undefined' && 
-                              window.self !== window.top && 
-                              (window.location.ancestorOrigins?.[0]?.includes('discord') || 
-                               document.referrer.includes('discord'));
+                              window.self !== window.top;
+      
+      // Check referrer and ancestor origins for Discord
+      const hasDiscordReferrer = document.referrer.includes('discord');
+      const hasDiscordAncestor = window.location.ancestorOrigins?.[0]?.includes('discord');
       
       // Quaternary check: Explicit client_id parameter (Activity Test Mode)
       const hasClientId = urlParams.has('client_id');
@@ -138,22 +143,30 @@ export class DiscordService extends EventEmitter {
       const hasDiscordUserAgent = typeof navigator !== 'undefined' && 
                                   navigator.userAgent.toLowerCase().includes('discord');
       
+      // Discord Activity specific checks
+      const hasDiscordActivity = urlParams.has('activity_id') || urlParams.has('application_id');
+      
       // Return true if ANY Discord indicator is present
       const isDiscord = hasDiscordSDK || hasDiscordFrameId || hasDiscordInstanceId || 
                        hasDiscordChannelId || hasDiscordGuildId || isInDiscordFrame || 
-                       hasClientId || hasDiscordUserAgent;
+                       hasClientId || hasDiscordUserAgent || hasDiscordReferrer || 
+                       hasDiscordAncestor || hasDiscordActivity;
       
-      console.log('🔍 Discord Detection:', {
+      console.log('🔍 Discord Detection Results:', {
+        url: window.location.href,
         hasDiscordSDK,
         hasDiscordFrameId,
         hasDiscordInstanceId,
         hasDiscordChannelId,
         hasDiscordGuildId,
         isInDiscordFrame,
+        hasDiscordReferrer,
+        hasDiscordAncestor,
         hasClientId,
         hasDiscordUserAgent,
+        hasDiscordActivity,
         forceMode: this.config.forceDiscordMode,
-        isDiscord
+        finalResult: isDiscord
       });
       
       return isDiscord;
