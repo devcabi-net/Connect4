@@ -201,7 +201,10 @@ export class DiscordService extends EventEmitter {
 
     console.log('🎮 Demo mode initialized');
     console.log('🎯 DiscordService emitting connected event:', this.currentUser);
+    console.log('🎯 EventEmitter listeners for connected:', this.listenerCount('connected'));
+    console.log('🎯 EventEmitter event names:', this.eventNames());
     this.emit('connected', this.currentUser);
+    console.log('🎯 Connected event emitted successfully');
   }
 
   private hasRequiredDiscordParameters(): boolean {

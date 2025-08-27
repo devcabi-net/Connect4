@@ -144,7 +144,7 @@
         setTimeout(() => {
             const app = document.getElementById('app');
             // Only show fallback if still on loading screen AND no Discord user is connected
-            if (app && app.innerHTML.includes('loading-screen') && !window.discordUserConnected) {
+            if (app && app.innerHTML.includes('loading-screen')) {
                 console.log('🔧 Fallback: App stuck on loading screen, showing demo welcome screen');
                 app.innerHTML = `
                     <div style="
@@ -215,7 +215,7 @@
                     </div>
                 `;
             }
-        }, 8000); // 8 second fallback timeout
+        }, 3000); // 3 second fallback timeout
         
         // Development debug info
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
