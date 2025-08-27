@@ -42,8 +42,11 @@ Go to: https://discord.com/developers/applications/1407945986424307713
 - We don't need them - Discord CSP blocks external requests anyway
 - The `/` → `cordcabi.net` mapping is WRONG and must be removed
 
-**OAuth2 Redirect URLs:**
-- Not needed for Discord Activities (authentication happens within Discord)
+**OAuth2 Redirect URLs (REQUIRED):**
+Add these in OAuth2 → Redirects:
+- `https://discord.com/oauth2/authorize` (for Discord's internal auth)
+- `https://discord.com/app-directory` (for app directory)
+- `https://disconnect4.netlify.app` (your app URL)
 
 ### **2. No Code Changes Needed**
 The authentication is simplified and doesn't use hardcoded URLs anymore. All references to external domains have been removed due to CSP restrictions.
