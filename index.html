@@ -140,6 +140,82 @@
             }, 1500);
         });
         
+        // Fallback mechanism: If app doesn't load properly, show demo screen
+        setTimeout(() => {
+            const app = document.getElementById('app');
+            if (app && app.innerHTML.includes('loading-screen')) {
+                console.log('🔧 Fallback: App stuck on loading screen, showing demo welcome screen');
+                app.innerHTML = `
+                    <div style="
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        min-height: 100vh; 
+                        text-align: center;
+                        padding: 20px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    ">
+                        <div style="
+                            background: rgba(255, 255, 255, 0.1); 
+                            padding: 40px; 
+                            border-radius: 12px; 
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            max-width: 500px;
+                            backdrop-filter: blur(10px);
+                        ">
+                            <h1 style="margin-bottom: 16px; font-size: 28px; font-weight: 700;">🎮 Discord Game Hub</h1>
+                            <p style="margin-bottom: 24px; color: rgba(255, 255, 255, 0.9); font-size: 16px;">
+                                Welcome to the Discord Game Hub! Play Connect 4 and other board games with friends.
+                            </p>
+                            <div style="margin-bottom: 32px;">
+                                <h3 style="margin-bottom: 16px; color: #fff;">Available Games:</h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                                    <div style="background: rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                        <h4 style="margin: 0 0 8px 0; color: #fff;">Connect 4</h4>
+                                        <p style="margin: 0; font-size: 12px; color: rgba(255, 255, 255, 0.7);">Classic strategy game</p>
+                                    </div>
+                                    <div style="background: rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                        <h4 style="margin: 0 0 8px 0; color: #fff;">Mancala</h4>
+                                        <p style="margin: 0; font-size: 12px; color: rgba(255, 255, 255, 0.7);">Coming soon</p>
+                                    </div>
+                                    <div style="background: rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                        <h4 style="margin: 0 0 8px 0; color: #fff;">Tic Tac Toe</h4>
+                                        <p style="margin: 0; font-size: 12px; color: rgba(255, 255, 255, 0.7);">Coming soon</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 16px; justify-content: center;">
+                                <button onclick="location.reload()" style="
+                                    background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 24px;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                ">
+                                    🎮 Create Game
+                                </button>
+                                <button onclick="location.reload()" style="
+                                    background: rgba(255, 255, 255, 0.1);
+                                    color: white;
+                                    border: 1px solid rgba(255, 255, 255, 0.3);
+                                    padding: 12px 24px;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                ">
+                                    🔄 Reload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }, 8000); // 8 second fallback timeout
+        
         // Development debug info
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             const debugInfo = document.getElementById('debug-info');
