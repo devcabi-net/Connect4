@@ -4,7 +4,7 @@ import { DiscordUser } from '@core/types';
 
 export interface DiscordConfig {
   clientId: string;
-  scopes: ('identify' | 'guilds')[];
+  scopes: string[];
   forceDiscordMode?: boolean; // For development testing
 }
 
@@ -47,48 +47,61 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // Simplified Discord Activity authentication - just get user info for display
-      console.log('🔐 Getting Discord user info for display...');
+      // Discord Embedded App SDK authentication flow (per official documentation)
+      console.log('🔐 Starting Discord authentication...');
       
       try {
-        // For Discord Activities, try the simple authenticate method first
-        console.log('🔐 Attempting Discord Activity authenticate...');
-        const authResponse = await this.sdk.commands.authenticate({});
+        // According to Discord docs, authenticate() returns user info directly
+        // No need for complex OAuth2 flows in Activities
+        console.log('📝 Authenticating with Discord SDK...');
         
-        console.log('✅ Authentication response:', authResponse);
+        // The authenticate command will prompt user if needed and return their info
+        const auth = await this.sdk.commands.authenticate({
+          // No parameters needed for basic authentication in Activities
+        });
         
-        if (authResponse && authResponse.user) {
+        console.log('✅ Authentication response:', auth);
+        
+        // Extract user information from auth response
+        if (auth && auth.user) {
           this.currentUser = {
-            id: authResponse.user.id,
-            username: authResponse.user.username,
-            discriminator: authResponse.user.discriminator || '0',
-            avatar: authResponse.user.avatar ? 
-              `https://cdn.discordapp.com/avatars/${authResponse.user.id}/${authResponse.user.avatar}.png?size=128` : 
+            id: auth.user.id,
+            username: auth.user.username,
+            discriminator: auth.user.discriminator || '0',
+            avatar: auth.user.avatar ? 
+              `https://cdn.discordapp.com/avatars/${auth.user.id}/${auth.user.avatar}.png?size=128` : 
               undefined,
-            globalName: authResponse.user.global_name || authResponse.user.username
+            globalName: auth.user.global_name || auth.user.username
           };
 
-          console.log('✅ User authenticated:', this.currentUser);
+          console.log('✅ Discord user authenticated:', this.currentUser);
+          
+          // Set up activity-specific features
+          await this.setupActivity();
+          
+          this.isConnected = true;
+          this.emit('connected', this.currentUser);
+          
+          console.log(`✅ Discord connected: ${this.currentUser.username}`);
           return true;
         }
 
-        // If authenticate doesn't work, fall back to demo mode
-        throw new Error('Discord Activity authenticate() did not return user info');
+        // Authentication didn't return user info
+        throw new Error('Discord authenticate() did not return user information');
         
       } catch (authError) {
-        console.error('❌ Discord Activity authentication failed:', authError);
+        console.error('❌ Discord authentication failed:', authError);
+        
+        // Try to provide helpful debugging information
+        if ((authError as any).code === 4006) {
+          console.error('🔒 User declined authorization - falling back to demo mode');
+        } else if ((authError as any).code === 4009) {
+          console.error('🔑 No access token - Activity may need proper setup');
+        }
+        
         console.error('Falling back to demo mode...');
         throw authError;
       }
-
-      // Set up activity
-      await this.setupActivity();
-
-      this.isConnected = true;
-      this.emit('connected', this.currentUser);
-      
-      console.log(`✅ Discord authenticated: ${this.currentUser?.username}`);
-      return true;
 
     } catch (error) {
       console.error('❌ Discord initialization failed:', error);
