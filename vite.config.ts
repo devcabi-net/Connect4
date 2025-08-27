@@ -23,7 +23,6 @@ export default defineConfig({
     port: 3000,
     host: true,
     cors: true,
-    https: true, // mkcert plugin will provide trusted certificates
     headers: {
       // Allow Discord to frame this app
       'X-Frame-Options': 'ALLOWALL',

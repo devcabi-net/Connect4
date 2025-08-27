@@ -47,74 +47,37 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // Implement PROPER Discord Activity OAuth2 flow as per documentation
-      console.log('🔐 Starting official Discord Activity authentication flow...');
+      // Simplified Discord Activity authentication - just get user info for display
+      console.log('🔐 Getting Discord user info for display...');
       
       try {
-        // Step 1: Get authorization code from Discord
-        console.log('🔐 Step 1: Getting authorization code from Discord...');
-        const { code } = await this.sdk.commands.authorize({
-          client_id: this.config.clientId,
-          response_type: 'code',
-          state: '',
-          prompt: 'none',
-          scope: this.config.scopes,
-        });
+        // For Discord Activities, try the simple authenticate method first
+        console.log('🔐 Attempting Discord Activity authenticate...');
+        const authResponse = await this.sdk.commands.authenticate({});
         
-        console.log('✅ Authorization code received');
+        console.log('✅ Authentication response:', authResponse);
         
-        if (!code) {
-          throw new Error('No authorization code received from Discord');
-        }
-        
-        // Step 2: Exchange code for access token via backend
-        console.log('🔐 Step 2: Exchanging code for access token...');
-        const tokenResponse = await fetch('https://cordcabi.net/.netlify/functions/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ code }),
-        });
-        
-        if (!tokenResponse.ok) {
-          const error = await tokenResponse.json();
-          console.error('❌ Token exchange failed:', error);
-          throw new Error(`Token exchange failed: ${error.error}`);
-        }
-        
-        const { access_token } = await tokenResponse.json();
-        console.log('✅ Access token obtained');
-        
-        // Step 3: Authenticate with Discord using the access token
-        console.log('🔐 Step 3: Authenticating with access token...');
-        const authResponse = await this.sdk.commands.authenticate({
-          access_token,
-        });
-        
-        console.log('✅ Authentication successful:', authResponse);
-        
-        if (!authResponse?.user) {
-          throw new Error('Authentication succeeded but no user data received');
-        }
-        
-        this.currentUser = {
-          id: authResponse.user.id,
-          username: authResponse.user.username,
-          discriminator: authResponse.user.discriminator || '0',
-          avatar: authResponse.user.avatar || undefined,
-          globalName: authResponse.user.global_name || authResponse.user.username
-        };
+        if (authResponse && authResponse.user) {
+          this.currentUser = {
+            id: authResponse.user.id,
+            username: authResponse.user.username,
+            discriminator: authResponse.user.discriminator || '0',
+            avatar: authResponse.user.avatar ? 
+              `https://cdn.discordapp.com/avatars/${authResponse.user.id}/${authResponse.user.avatar}.png?size=128` : 
+              undefined,
+            globalName: authResponse.user.global_name || authResponse.user.username
+          };
 
-        console.log('✅ User authenticated:', this.currentUser);
+          console.log('✅ User authenticated:', this.currentUser);
+          return true;
+        }
+
+        // If authenticate doesn't work, fall back to demo mode
+        throw new Error('Discord Activity authenticate() did not return user info');
         
       } catch (authError) {
         console.error('❌ Discord Activity authentication failed:', authError);
-        console.error('This indicates either:');
-        console.error('1. Backend token exchange is not working');
-        console.error('2. Discord client secret is not configured');
-        console.error('3. Network/proxy issues in Discord Activity environment');
-        
+        console.error('Falling back to demo mode...');
         throw authError;
       }
 
