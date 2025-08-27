@@ -196,6 +196,7 @@ export class DiscordService extends EventEmitter {
     };
 
     console.log('🎮 Demo mode initialized');
+    console.log('🎯 DiscordService emitting connected event:', this.currentUser);
     this.emit('connected', this.currentUser);
   }
 
