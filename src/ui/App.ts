@@ -79,16 +79,24 @@ export class App extends EventEmitter {
   }
 
   setPlayer(player: Player | null): void {
+    console.log('🎯 App.setPlayer called with:', player);
     this.currentPlayer = player;
     if (player) {
+      console.log('🎯 Showing welcome screen for player:', player.name);
       this.showWelcome();
     } else {
+      console.log('🎯 Player disconnected, showing error');
       this.showError('Player disconnected');
     }
   }
 
   showWelcome(): void {
-    if (!this.currentPlayer) return;
+    console.log('🎯 showWelcome called, currentPlayer:', this.currentPlayer);
+    if (!this.currentPlayer) {
+      console.log('🎯 No current player, returning early');
+      return;
+    }
+    console.log('🎯 Setting screen to welcome and rendering');
     this.currentScreen = 'welcome';
     this.render();
   }

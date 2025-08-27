@@ -37,7 +37,21 @@ class DiscordGameHub {
             };
             this.app.setPlayer(demoPlayer);
           }
-        }, 1000);
+        }, 2000); // Increased timeout to 2 seconds
+        
+        // Additional fallback: If still on loading screen after 5 seconds, force demo mode
+        setTimeout(() => {
+          const currentPlayer = this.gameHub.getCurrentPlayer();
+          if (!currentPlayer) {
+            console.log('🔧 Force fallback: Creating demo player after timeout');
+            const demoPlayer = {
+              id: `demo_${Math.random().toString(36).substr(2, 9)}`,
+              name: `DemoUser${Math.floor(Math.random() * 1000)}`,
+              avatar: undefined
+            };
+            this.app.setPlayer(demoPlayer);
+          }
+        }, 5000);
       } else {
         console.error('❌ Failed to initialize Game Hub');
         this.app.showError('Failed to initialize. Please reload the activity.');
