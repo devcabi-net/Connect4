@@ -30,50 +30,49 @@ export class DiscordService extends EventEmitter {
       }
 
       console.log('🎯 Initializing Discord SDK...');
+      console.log('SDK Import check:', typeof DiscordSDK);
       
       if (this.config.forceDiscordMode) {
         console.log('🔧 Force Discord mode enabled - will attempt Discord auth even if not detected');
       }
       
+      // Check if SDK is available
+      if (typeof DiscordSDK === 'undefined') {
+        throw new Error('Discord SDK not available - make sure @discord/embedded-app-sdk is properly imported');
+      }
+      
       // Initialize Discord SDK
       this.sdk = new DiscordSDK(this.config.clientId);
+      console.log('📦 Discord SDK instance created with client ID:', this.config.clientId);
       
       // Wait for SDK to be ready with timeout
+      console.log('⏳ Waiting for Discord SDK to be ready...');
       const readyPromise = this.sdk.ready();
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Discord SDK ready timeout')), 10000)
+        setTimeout(() => {
+          console.error('SDK ready timeout - SDK state:', this.sdk);
+          reject(new Error('Discord SDK ready timeout after 15 seconds'));
+        }, 15000) // Increased timeout
       );
       
       await Promise.race([readyPromise, timeoutPromise]);
-      console.log('✅ Discord SDK ready');
+      console.log('✅ Discord SDK is ready');
 
-      // Discord Embedded App SDK authentication flow
+      // Discord Embedded App SDK authentication flow for Activities
       console.log('🔐 Starting Discord authentication...');
       
       try {
-        // For Discord Activities, we need to authorize first with proper scopes
-        console.log('📝 Requesting Discord authorization with scopes:', this.config.scopes);
+        // For Discord Activities embedded in the client, we directly authenticate
+        // The SDK will automatically handle the authorization prompt if needed
+        console.log('📝 Authenticating with Discord Activity SDK...');
         
-        // Convert string scopes to the SDK's expected format
-        const scopes = this.config.scopes as any; // The SDK expects specific enum values
-        
-        // Step 1: Authorize to get user consent (this shows the OAuth2 prompt)
-        const { code } = await this.sdk.commands.authorize({
-          client_id: this.config.clientId,
-          response_type: 'code',
-          state: '',
-          prompt: 'none', // Will still prompt if user hasn't authorized
-          scope: scopes
+        // In Discord Activities, authenticate() handles everything
+        // It will show the authorization prompt automatically if the user hasn't authorized yet
+        const auth = await this.sdk.commands.authenticate({
+          // Empty object for Discord Activities - the SDK handles the rest
         });
         
-        console.log('✅ Authorization code received:', code ? 'Yes' : 'No');
-        
-        // Step 2: Authenticate using the authorization code
-        // In Discord Activities, authenticate() with empty object uses the authorized session
-        console.log('🔑 Authenticating with Discord...');
-        const auth = await this.sdk.commands.authenticate({});
-        
-        console.log('✅ Authentication response received');
+        console.log('✅ Authentication successful');
         
         // Extract user information from auth response
         if (auth && auth.user) {
