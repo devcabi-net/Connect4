@@ -13,7 +13,7 @@ export class GameHub extends EventEmitter {
     // Initialize Discord service
     this.discordService = new DiscordService({
       clientId: import.meta.env.VITE_DISCORD_CLIENT_ID || '1407945986424307713',
-      scopes: ['identify', 'guilds'],
+      scopes: ['identify', 'guilds', 'rpc.activities.write'],
       forceDiscordMode: import.meta.env.VITE_FORCE_DISCORD_MODE === 'true'
     });
 

@@ -79,7 +79,7 @@ export class DiscordService extends EventEmitter {
           client_id: this.config.clientId,
           response_type: 'code',
           state: '',
-          prompt: 'none', // Show prompt only if user hasn't authorized
+          prompt: 'consent' as any, // Force authorization prompt
           scope: this.config.scopes as any, // Cast to any for SDK compatibility
         });
         
