@@ -47,20 +47,33 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // Discord Embedded App SDK authentication flow (per official documentation)
+      // Discord Embedded App SDK authentication flow
       console.log('🔐 Starting Discord authentication...');
       
       try {
-        // According to Discord docs, authenticate() returns user info directly
-        // No need for complex OAuth2 flows in Activities
-        console.log('📝 Authenticating with Discord SDK...');
+        // For Discord Activities, we need to authorize first with proper scopes
+        console.log('📝 Requesting Discord authorization with scopes:', this.config.scopes);
         
-        // The authenticate command will prompt user if needed and return their info
-        const auth = await this.sdk.commands.authenticate({
-          // No parameters needed for basic authentication in Activities
+        // Convert string scopes to the SDK's expected format
+        const scopes = this.config.scopes as any; // The SDK expects specific enum values
+        
+        // Step 1: Authorize to get user consent (this shows the OAuth2 prompt)
+        const { code } = await this.sdk.commands.authorize({
+          client_id: this.config.clientId,
+          response_type: 'code',
+          state: '',
+          prompt: 'none', // Will still prompt if user hasn't authorized
+          scope: scopes
         });
         
-        console.log('✅ Authentication response:', auth);
+        console.log('✅ Authorization code received:', code ? 'Yes' : 'No');
+        
+        // Step 2: Authenticate using the authorization code
+        // In Discord Activities, authenticate() with empty object uses the authorized session
+        console.log('🔑 Authenticating with Discord...');
+        const auth = await this.sdk.commands.authenticate({});
+        
+        console.log('✅ Authentication response received');
         
         // Extract user information from auth response
         if (auth && auth.user) {
