@@ -47,16 +47,13 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // For Discord Activities, try multiple authentication approaches
-      console.log('🔐 Attempting Discord Activity authentication...');
-      
-      let authResponse: any = null;
-      let authorizeResponse: any = null;
+      // Implement PROPER Discord Activity OAuth2 flow as per documentation
+      console.log('🔐 Starting official Discord Activity authentication flow...');
       
       try {
-        // First, try to authorize (this should trigger user consent if needed)
-        console.log('🔐 Step 1: Authorizing with Discord...');
-        authorizeResponse = await this.sdk.commands.authorize({
+        // Step 1: Get authorization code from Discord
+        console.log('🔐 Step 1: Getting authorization code from Discord...');
+        const { code } = await this.sdk.commands.authorize({
           client_id: this.config.clientId,
           response_type: 'code',
           state: '',
@@ -64,47 +61,61 @@ export class DiscordService extends EventEmitter {
           scope: this.config.scopes,
         });
         
-        console.log('✅ Authorization response:', authorizeResponse);
+        console.log('✅ Authorization code received');
         
-        // Now try authenticate with no parameters (Discord Activities way)
-        console.log('🔐 Step 2: Authenticating (Discord Activity style)...');
-        authResponse = await this.sdk.commands.authenticate({});
-        
-        console.log('✅ Authentication response:', authResponse);
-        
-        // If that doesn't work and we have a code, try using it
-        if (!authResponse?.user && authorizeResponse?.code) {
-          console.log('🔐 Step 3: Trying authenticate with authorization code...');
-          authResponse = await this.sdk.commands.authenticate({
-            access_token: authorizeResponse.code
-          });
-          console.log('✅ Authentication with code response:', authResponse);
+        if (!code) {
+          throw new Error('No authorization code received from Discord');
         }
         
-      } catch (authError) {
-        console.log('❌ Discord authentication failed:', authError);
+        // Step 2: Exchange code for access token via backend
+        console.log('🔐 Step 2: Exchanging code for access token...');
+        const tokenResponse = await fetch('/.proxy/netlify/functions/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code }),
+        });
         
-        // Try one more approach - check if user data is available elsewhere
-        console.log('🔐 Checking for user data in Discord environment...');
-        console.log('Discord SDK instance:', this.sdk);
-        console.log('Available commands:', Object.keys(this.sdk.commands));
+        if (!tokenResponse.ok) {
+          const error = await tokenResponse.json();
+          console.error('❌ Token exchange failed:', error);
+          throw new Error(`Token exchange failed: ${error.error}`);
+        }
         
-        throw authError;
-      }
-
-      if (authResponse && (authResponse as any).user) {
-        const user = (authResponse as any).user;
+        const { access_token } = await tokenResponse.json();
+        console.log('✅ Access token obtained');
+        
+        // Step 3: Authenticate with Discord using the access token
+        console.log('🔐 Step 3: Authenticating with access token...');
+        const authResponse = await this.sdk.commands.authenticate({
+          access_token,
+        });
+        
+        console.log('✅ Authentication successful:', authResponse);
+        
+        if (!authResponse?.user) {
+          throw new Error('Authentication succeeded but no user data received');
+        }
+        
         this.currentUser = {
-          id: user.id,
-          username: user.username,
-          discriminator: user.discriminator || '0',
-          avatar: user.avatar || undefined,
-          globalName: user.global_name || user.username
+          id: authResponse.user.id,
+          username: authResponse.user.username,
+          discriminator: authResponse.user.discriminator || '0',
+          avatar: authResponse.user.avatar || undefined,
+          globalName: authResponse.user.global_name || authResponse.user.username
         };
 
         console.log('✅ User authenticated:', this.currentUser);
-      } else {
-        throw new Error('Failed to get user information from Discord Activity - no user in response');
+        
+      } catch (authError) {
+        console.error('❌ Discord Activity authentication failed:', authError);
+        console.error('This indicates either:');
+        console.error('1. Backend token exchange is not working');
+        console.error('2. Discord client secret is not configured');
+        console.error('3. Network/proxy issues in Discord Activity environment');
+        
+        throw authError;
       }
 
       // Set up activity

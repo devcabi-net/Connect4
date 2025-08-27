@@ -5,6 +5,16 @@
 [build.environment]
   NODE_VERSION = "18"
 
+[functions]
+  directory = "netlify/functions"
+
+# Proxy for Discord Activity OAuth2 token exchange
+[[redirects]]
+  from = "/.proxy/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -12,5 +22,8 @@
 
 [context.production.environment]
   VITE_DISCORD_CLIENT_ID = "1407945986424307713"
+  # REQUIRED: Add DISCORD_CLIENT_SECRET in Netlify dashboard environment variables
+  
+  # Supabase (optional - disabled in Discord Activities due to CSP)
   VITE_SUPABASE_URL = "https://uncywyqqgqwrkgjllkna.supabase.co"
-  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuY3l3eXFxZ3F3cmtnamxsa25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMTgyMjcsImV4cCI6MjA3MTc5NDIyN30.96ZkUuEMvupBcEG-FtxK0zb6jIOdpfpXwBWUSBu0Ooo"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuY3l3eXFxZ3F3cmtnamxsa25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMTgyMjcsImV4cCI6MjA3MVR5NDIyN30.96ZkUuEMvupBcEG-FtxK0zb6jIOdpfpXwBWUSBu0Ooo"
