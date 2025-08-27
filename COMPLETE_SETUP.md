@@ -32,13 +32,18 @@ Custom domain: https://cordcabi.net (redirects to Netlify)
 ### **1. Discord Developer Portal**
 Go to: https://discord.com/developers/applications/1407945986424307713
 
-**Update Activity URL Mappings:**
-- **Development:** `/.proxy/https://localhost:3000` → `/`
-- **Production:** `/.proxy/https://disconnect4.netlify.app` → `/`
+**Activity URL Mappings (CRITICAL):**
+#### Root Mapping (REQUIRED):
+- **PREFIX:** (leave empty - Discord shows "/" placeholder)
+- **TARGET:** `disconnect4.netlify.app` (just domain, no https://)
+
+#### Proxy Path Mappings (DELETE ALL):
+- **Click the X to remove any proxy mappings**
+- We don't need them - Discord CSP blocks external requests anyway
+- The `/` → `cordcabi.net` mapping is WRONG and must be removed
 
 **OAuth2 Redirect URLs:**
-- `https://disconnect4.netlify.app`
-- `https://discord.com/oauth2/authorize`
+- Not needed for Discord Activities (authentication happens within Discord)
 
 ### **2. No Code Changes Needed**
 The authentication is simplified and doesn't use hardcoded URLs anymore. All references to external domains have been removed due to CSP restrictions.
