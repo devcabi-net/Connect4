@@ -61,14 +61,10 @@ export class DiscordService extends EventEmitter {
       } catch (sdkError) {
         console.error('❌ Discord SDK initialization failed:', sdkError);
         
-        // If we're in force mode, try to continue with demo mode
-        if (this.config.forceDiscordMode) {
-          console.log('🔧 Force Discord mode enabled but SDK failed - using demo mode');
-          await this.initializeDemoMode();
-          return true;
-        }
-        
-        throw sdkError;
+        // Always fall back to demo mode if Discord SDK fails
+        console.log('🔧 Discord SDK failed - falling back to demo mode');
+        await this.initializeDemoMode();
+        return true;
       }
 
       // Proper Discord Activities OAuth2 authentication flow
@@ -212,6 +208,15 @@ export class DiscordService extends EventEmitter {
       // Force Discord mode for testing (can be enabled via URL parameter)
       const forceDiscordParam = urlParams.get('force_discord');
       const forceDiscordMode = forceDiscordParam === 'true' || this.config.forceDiscordMode;
+      
+      console.log('🔧 URL Parameter Debug:', {
+        search: window.location.search,
+        forceDiscordParam,
+        forceDiscordParamType: typeof forceDiscordParam,
+        forceDiscordParamValue: forceDiscordParam,
+        configForceMode: this.config.forceDiscordMode,
+        finalForceMode: forceDiscordMode
+      });
       
       console.log('🔧 Force Discord Mode Check:', {
         forceDiscordParam,
