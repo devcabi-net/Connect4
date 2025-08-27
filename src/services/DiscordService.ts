@@ -69,7 +69,7 @@ export class DiscordService extends EventEmitter {
         
         // Step 2: Exchange code for access token via backend
         console.log('🔐 Step 2: Exchanging code for access token...');
-        const tokenResponse = await fetch('/.proxy/netlify/functions/token', {
+        const tokenResponse = await fetch('https://cordcabi.net/.netlify/functions/token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
