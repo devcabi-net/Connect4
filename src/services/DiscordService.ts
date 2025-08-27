@@ -42,21 +42,34 @@ export class DiscordService extends EventEmitter {
       }
       
       // Initialize Discord SDK
-      this.sdk = new DiscordSDK(this.config.clientId);
-      console.log('📦 Discord SDK instance created with client ID:', this.config.clientId);
-      
-      // Wait for SDK to be ready with timeout
-      console.log('⏳ Waiting for Discord SDK to be ready...');
-      const readyPromise = this.sdk.ready();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => {
-          console.error('SDK ready timeout - SDK state:', this.sdk);
-          reject(new Error('Discord SDK ready timeout after 15 seconds'));
-        }, 15000) // Increased timeout
-      );
-      
-      await Promise.race([readyPromise, timeoutPromise]);
-      console.log('✅ Discord SDK is ready');
+      try {
+        this.sdk = new DiscordSDK(this.config.clientId);
+        console.log('📦 Discord SDK instance created with client ID:', this.config.clientId);
+        
+        // Wait for SDK to be ready with timeout
+        console.log('⏳ Waiting for Discord SDK to be ready...');
+        const readyPromise = this.sdk.ready();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => {
+            console.error('SDK ready timeout - SDK state:', this.sdk);
+            reject(new Error('Discord SDK ready timeout after 15 seconds'));
+          }, 15000) // Increased timeout
+        );
+        
+        await Promise.race([readyPromise, timeoutPromise]);
+        console.log('✅ Discord SDK is ready');
+      } catch (sdkError) {
+        console.error('❌ Discord SDK initialization failed:', sdkError);
+        
+        // If we're in force mode, try to continue with demo mode
+        if (this.config.forceDiscordMode) {
+          console.log('🔧 Force Discord mode enabled but SDK failed - using demo mode');
+          await this.initializeDemoMode();
+          return true;
+        }
+        
+        throw sdkError;
+      }
 
       // Proper Discord Activities OAuth2 authentication flow
       console.log('🔐 Starting Discord OAuth2 authentication flow...');
@@ -195,6 +208,16 @@ export class DiscordService extends EventEmitter {
       // Check multiple Discord indicators
       const urlParams = new URLSearchParams(window.location.search);
       
+      // Force Discord mode for testing (can be enabled via URL parameter)
+      const forceDiscordParam = urlParams.get('force_discord');
+      const forceDiscordMode = forceDiscordParam === 'true' || this.config.forceDiscordMode;
+      
+      console.log('🔧 Force Discord Mode Check:', {
+        forceDiscordParam,
+        configForceMode: this.config.forceDiscordMode,
+        finalForceMode: forceDiscordMode
+      });
+      
       // Primary check: Discord SDK is available
       const hasDiscordSDK = typeof window !== 'undefined' && 
                            ('DiscordSDK' in window || this.sdk !== null);
@@ -229,8 +252,8 @@ export class DiscordService extends EventEmitter {
       // Check for launch_id (Activity launch parameter)
       const hasLaunchId = urlParams.has('launch_id');
       
-      // Return true if ANY Discord indicator is present
-      const isDiscord = hasDiscordSDK || hasDiscordFrameId || hasDiscordInstanceId || 
+      // Return true if ANY Discord indicator is present OR force mode is enabled
+      const isDiscord = forceDiscordMode || hasDiscordSDK || hasDiscordFrameId || hasDiscordInstanceId || 
                        hasDiscordChannelId || hasDiscordGuildId || isInDiscordFrame || 
                        hasClientId || hasDiscordUserAgent || hasDiscordReferrer || 
                        hasDiscordAncestor || hasDiscordActivity || isDiscordSaysDomain || 
@@ -251,7 +274,7 @@ export class DiscordService extends EventEmitter {
         hasDiscordActivity,
         isDiscordSaysDomain,
         hasLaunchId,
-        forceMode: this.config.forceDiscordMode,
+        forceMode: forceDiscordMode,
         finalResult: isDiscord
       });
       
