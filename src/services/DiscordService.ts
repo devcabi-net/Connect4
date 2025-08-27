@@ -47,45 +47,34 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // Step 1: Authorize the application (triggers authorization dialog)
-      console.log('🔐 Step 1: Authorizing with Discord...');
-      const authorizePromise = this.sdk.commands.authorize({
-        client_id: this.config.clientId,
-        response_type: 'code',
-        state: '',
-        prompt: 'none',
-        scope: this.config.scopes,
-      });
-      const authorizeTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Discord authorization timeout after 15 seconds')), 15000)
-      );
+      // For Discord Activities, try direct authentication
+      console.log('🔐 Authenticating with Discord Activity...');
       
-      const authorizeResponse = await Promise.race([authorizePromise, authorizeTimeout]) as any;
-      console.log('✅ Authorization successful:', authorizeResponse);
+      let authResponse: any = null;
+      try {
+        // Try the standard authenticate method
+        console.log('🔐 Trying authenticate method...');
+        authResponse = await this.sdk.commands.authenticate({});
+        console.log('✅ Authentication response:', authResponse);
+      } catch (authError) {
+        console.log('❌ Standard authenticate failed:', authError);
+        console.log('❌ Discord Activity authentication not working');
+        throw authError;
+      }
 
-      // Step 2: Authenticate with the authorization code
-      console.log('🔐 Step 2: Authenticating with Discord...');
-      console.log('Authorize response details:', authorizeResponse);
-      const authPromise = this.sdk.commands.authenticate({});
-      const authTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Discord authentication timeout after 15 seconds')), 15000)
-      );
-      
-      const authResponse = await Promise.race([authPromise, authTimeout]) as any;
-      console.log('✅ Authentication successful:', authResponse);
-
-      if (authResponse && authResponse.user) {
+      if (authResponse && (authResponse as any).user) {
+        const user = (authResponse as any).user;
         this.currentUser = {
-          id: authResponse.user.id,
-          username: authResponse.user.username,
-          discriminator: authResponse.user.discriminator || '0',
-          avatar: authResponse.user.avatar || undefined,
-          globalName: authResponse.user.global_name || authResponse.user.username
+          id: user.id,
+          username: user.username,
+          discriminator: user.discriminator || '0',
+          avatar: user.avatar || undefined,
+          globalName: user.global_name || user.username
         };
 
         console.log('✅ User authenticated:', this.currentUser);
       } else {
-        throw new Error('Failed to get user information from Discord');
+        throw new Error('Failed to get user information from Discord Activity - no user in response');
       }
 
       // Set up activity
