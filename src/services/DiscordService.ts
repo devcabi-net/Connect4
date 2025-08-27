@@ -46,17 +46,9 @@ export class DiscordService extends EventEmitter {
         this.sdk = new DiscordSDK(this.config.clientId);
         console.log('📦 Discord SDK instance created with client ID:', this.config.clientId);
         
-        // Wait for SDK to be ready with timeout
+        // Wait for SDK to be ready (no timeout since authentication works)
         console.log('⏳ Waiting for Discord SDK to be ready...');
-        const readyPromise = this.sdk.ready();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => {
-            console.error('SDK ready timeout - SDK state:', this.sdk);
-            reject(new Error('Discord SDK ready timeout after 15 seconds'));
-          }, 15000) // Increased timeout
-        );
-        
-        await Promise.race([readyPromise, timeoutPromise]);
+        await this.sdk.ready();
         console.log('✅ Discord SDK is ready');
       } catch (sdkError) {
         console.error('❌ Discord SDK initialization failed:', sdkError);
@@ -132,6 +124,11 @@ export class DiscordService extends EventEmitter {
           
           this.isConnected = true;
           this.emit('connected', this.currentUser);
+          
+          // Set global flag to prevent HTML fallback from overriding successful auth
+          if (typeof window !== 'undefined') {
+            (window as any).discordUserConnected = true;
+          }
           
           console.log(`✅ Discord connected: ${this.currentUser.username}`);
           return true;

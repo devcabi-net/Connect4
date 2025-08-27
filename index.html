@@ -143,7 +143,8 @@
         // Fallback mechanism: If app doesn't load properly, show demo screen
         setTimeout(() => {
             const app = document.getElementById('app');
-            if (app && app.innerHTML.includes('loading-screen')) {
+            // Only show fallback if still on loading screen AND no Discord user is connected
+            if (app && app.innerHTML.includes('loading-screen') && !window.discordUserConnected) {
                 console.log('🔧 Fallback: App stuck on loading screen, showing demo welcome screen');
                 app.innerHTML = `
                     <div style="
