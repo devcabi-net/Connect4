@@ -10,14 +10,11 @@ export interface Player {
 
 export interface GameRoom {
   id: string;
-  name: string;
   gameType: string;
   players: Player[];
-  maxPlayers: number;
+  currentPlayer: string;
   status: 'waiting' | 'playing' | 'finished';
-  isPrivate: boolean;
-  created: Date;
-  lastActivity: Date;
+  createdAt: string;
 }
 
 export interface GameState {
