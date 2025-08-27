@@ -24,6 +24,20 @@ class DiscordGameHub {
         console.log('✅ Game Hub initialized successfully');
         this.app.show();
         this.setupEventHandlers();
+        
+        // If no player is connected after initialization, create a demo player
+        setTimeout(() => {
+          const currentPlayer = this.gameHub.getCurrentPlayer();
+          if (!currentPlayer) {
+            console.log('🔧 No player connected, creating demo player');
+            const demoPlayer = {
+              id: `demo_${Math.random().toString(36).substr(2, 9)}`,
+              name: `DemoUser${Math.floor(Math.random() * 1000)}`,
+              avatar: undefined
+            };
+            this.app.setPlayer(demoPlayer);
+          }
+        }, 1000);
       } else {
         console.error('❌ Failed to initialize Game Hub');
         this.app.showError('Failed to initialize. Please reload the activity.');
