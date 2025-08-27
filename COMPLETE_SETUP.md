@@ -37,10 +37,10 @@ Go to: https://discord.com/developers/applications/1407945986424307713
 - **PREFIX:** (leave empty - Discord shows "/" placeholder)
 - **TARGET:** `disconnect4.netlify.app` (just domain, no https://)
 
-#### Proxy Path Mappings (DELETE ALL):
-- **Click the X to remove any proxy mappings**
-- We don't need them - Discord CSP blocks external requests anyway
-- The `/` → `cordcabi.net` mapping is WRONG and must be removed
+#### Proxy Path Mappings (REQUIRED for OAuth):
+- **PREFIX:** `/api`
+- **TARGET:** `disconnect4.netlify.app/.netlify/functions`
+- This mapping enables the OAuth2 token exchange through Discord's proxy
 
 **OAuth2 Redirect URLs (REQUIRED):**
 Add these in OAuth2 → Redirects:

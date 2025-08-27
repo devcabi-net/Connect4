@@ -58,18 +58,48 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK is ready');
 
-      // Discord Embedded App SDK authentication flow for Activities
-      console.log('🔐 Starting Discord authentication...');
+      // Proper Discord Activities OAuth2 authentication flow
+      console.log('🔐 Starting Discord OAuth2 authentication flow...');
       
       try {
-        // For Discord Activities embedded in the client, we directly authenticate
-        // The SDK will automatically handle the authorization prompt if needed
-        console.log('📝 Authenticating with Discord Activity SDK...');
+        // Step 1: Authorize with Discord to get an authorization code
+        console.log('📝 Step 1: Requesting authorization from Discord...');
+        console.log('Scopes:', this.config.scopes);
         
-        // In Discord Activities, authenticate() handles everything
-        // It will show the authorization prompt automatically if the user hasn't authorized yet
+        const { code } = await this.sdk.commands.authorize({
+          client_id: this.config.clientId,
+          response_type: 'code',
+          state: '',
+          prompt: 'none', // Show prompt only if user hasn't authorized
+          scope: this.config.scopes as any, // Cast to any for SDK compatibility
+        });
+        
+        console.log('✅ Authorization code received');
+        
+        // Step 2: Exchange the authorization code for an access token
+        // Use Discord's proxy path for Activities
+        console.log('🔑 Step 2: Exchanging code for access token...');
+        
+        const tokenResponse = await fetch('/.proxy/api/discord-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code }),
+        });
+        
+        if (!tokenResponse.ok) {
+          const error = await tokenResponse.text();
+          throw new Error(`Token exchange failed: ${error}`);
+        }
+        
+        const { access_token } = await tokenResponse.json();
+        console.log('✅ Access token received');
+        
+        // Step 3: Authenticate with the access token
+        console.log('🎯 Step 3: Authenticating with Discord...');
         const auth = await this.sdk.commands.authenticate({
-          // Empty object for Discord Activities - the SDK handles the rest
+          access_token,
         });
         
         console.log('✅ Authentication successful');
