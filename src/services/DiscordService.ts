@@ -47,18 +47,48 @@ export class DiscordService extends EventEmitter {
       await Promise.race([readyPromise, timeoutPromise]);
       console.log('✅ Discord SDK ready');
 
-      // For Discord Activities, try direct authentication
-      console.log('🔐 Authenticating with Discord Activity...');
+      // For Discord Activities, try multiple authentication approaches
+      console.log('🔐 Attempting Discord Activity authentication...');
       
       let authResponse: any = null;
+      let authorizeResponse: any = null;
+      
       try {
-        // Try the standard authenticate method
-        console.log('🔐 Trying authenticate method...');
+        // First, try to authorize (this should trigger user consent if needed)
+        console.log('🔐 Step 1: Authorizing with Discord...');
+        authorizeResponse = await this.sdk.commands.authorize({
+          client_id: this.config.clientId,
+          response_type: 'code',
+          state: '',
+          prompt: 'none',
+          scope: this.config.scopes,
+        });
+        
+        console.log('✅ Authorization response:', authorizeResponse);
+        
+        // Now try authenticate with no parameters (Discord Activities way)
+        console.log('🔐 Step 2: Authenticating (Discord Activity style)...');
         authResponse = await this.sdk.commands.authenticate({});
+        
         console.log('✅ Authentication response:', authResponse);
+        
+        // If that doesn't work and we have a code, try using it
+        if (!authResponse?.user && authorizeResponse?.code) {
+          console.log('🔐 Step 3: Trying authenticate with authorization code...');
+          authResponse = await this.sdk.commands.authenticate({
+            access_token: authorizeResponse.code
+          });
+          console.log('✅ Authentication with code response:', authResponse);
+        }
+        
       } catch (authError) {
-        console.log('❌ Standard authenticate failed:', authError);
-        console.log('❌ Discord Activity authentication not working');
+        console.log('❌ Discord authentication failed:', authError);
+        
+        // Try one more approach - check if user data is available elsewhere
+        console.log('🔐 Checking for user data in Discord environment...');
+        console.log('Discord SDK instance:', this.sdk);
+        console.log('Available commands:', Object.keys(this.sdk.commands));
+        
         throw authError;
       }
 
