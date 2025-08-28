@@ -10,6 +10,7 @@ class DiscordGameHub {
   constructor() {
     this.gameHub = new GameHub();
     this.app = new App('app');
+    this.setupEventHandlers(); // Set up event handlers BEFORE initialization
     this.initialize();
   }
 
@@ -23,7 +24,6 @@ class DiscordGameHub {
       if (success) {
         console.log('✅ Game Hub initialized successfully');
         this.app.show();
-        this.setupEventHandlers();
         
         // If no player is connected after initialization, create a demo player
         setTimeout(() => {
