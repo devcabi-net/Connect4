@@ -79,34 +79,30 @@ export class App extends EventEmitter {
   }
 
   setPlayer(player: Player | null): void {
-    console.log('🎯 App.setPlayer called with:', player);
-    console.log('🎯 Current screen before setPlayer:', this.currentScreen);
     this.currentPlayer = player;
     if (player) {
-      console.log('🎯 Showing welcome screen for player:', player.name);
+      // Update page title with player name
+      document.title = `Discord Game Hub - ${player.name}`;
       this.showWelcome();
     } else {
-      console.log('🎯 Player disconnected, showing error');
+      document.title = 'Discord Game Hub - Play Games with Friends';
       this.showError('Player disconnected');
     }
   }
 
   showWelcome(): void {
-    console.log('🎯 showWelcome called, currentPlayer:', this.currentPlayer);
     if (!this.currentPlayer) {
-      console.log('🎯 No current player, returning early');
       return;
     }
-    console.log('🎯 Setting screen to welcome and rendering');
     this.currentScreen = 'welcome';
-    console.log('🎯 About to call render()');
+    document.title = `Discord Game Hub - ${this.currentPlayer.name}`;
     this.render();
-    console.log('🎯 render() completed');
   }
 
   showLobby(): void {
     if (!this.currentPlayer) return;
     this.currentScreen = 'lobby';
+    document.title = `Lobby - ${this.currentPlayer.name} | Discord Game Hub`;
     this.render();
   }
 
@@ -114,6 +110,7 @@ export class App extends EventEmitter {
     if (!this.currentPlayer) return;
     this.currentRoom = room;
     this.currentScreen = 'game';
+    document.title = `Playing ${room.gameType} - ${this.currentPlayer.name} | Discord Game Hub`;
     this.render();
   }
 
@@ -132,46 +129,33 @@ export class App extends EventEmitter {
   }
 
   private render(): void {
-    console.log('🎯 render() called with currentScreen:', this.currentScreen);
-    console.log('🎯 Container element:', this.container);
-    
     // Clear container
     this.container.innerHTML = '';
-    console.log('🎯 Container cleared');
 
     // Render current screen
     switch (this.currentScreen) {
       case 'loading':
-        console.log('🎯 Rendering loading screen');
         this.container.appendChild(this.loadingScreen.render());
         break;
       case 'welcome':
-        console.log('🎯 Rendering welcome screen for player:', this.currentPlayer);
         try {
           const welcomeElement = this.welcomeScreen.render(this.currentPlayer!);
-          console.log('🎯 Welcome screen element created:', welcomeElement);
           this.container.appendChild(welcomeElement);
-          console.log('🎯 Welcome screen appended to container');
         } catch (error) {
-          console.error('🎯 Error rendering welcome screen:', error);
+          console.error('Error rendering welcome screen:', error);
         }
         break;
       case 'lobby':
-        console.log('🎯 Rendering lobby screen');
         this.container.appendChild(this.lobbyScreen.render(this.currentPlayer!));
         break;
       case 'game':
-        console.log('🎯 Rendering game screen');
         this.container.appendChild(this.gameScreen.render(this.currentRoom!, this.currentPlayer!));
         break;
       case 'error':
-        console.log('🎯 Rendering error screen');
         this.container.appendChild(this.errorScreen.render());
         break;
       default:
-        console.error('🎯 Unknown screen type:', this.currentScreen);
+        console.error('Unknown screen type:', this.currentScreen);
     }
-    
-    console.log('🎯 render() completed, container children count:', this.container.children.length);
   }
 }

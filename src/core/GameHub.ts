@@ -22,18 +22,12 @@ export class GameHub extends EventEmitter {
 
   private setupEventHandlers(): void {
     // Discord events
-    console.log('🎯 GameHub setting up event handlers');
-    console.log('🎯 GameHub DiscordService instance:', this.discordService);
-    
     this.discordService.on('connected', (user) => {
-      console.log('🎯 GameHub received connected event from DiscordService:', user);
       this.currentPlayer = {
         id: user.id,
         name: user.globalName || user.username,
         avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : undefined
       };
-      
-      console.log('🎯 GameHub emitting playerConnected event:', this.currentPlayer);
       this.emit('playerConnected', this.currentPlayer);
     });
 

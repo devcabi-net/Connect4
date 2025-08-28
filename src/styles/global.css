@@ -323,6 +323,22 @@ p {
 .game-card p {
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.game-status {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-success);
+  color: var(--text-primary);
+  display: inline-block;
+}
+
+.game-status.coming-soon {
+  background: var(--color-secondary);
+  color: var(--text-secondary);
 }
 
 .welcome-actions {
@@ -673,6 +689,16 @@ button:focus, .game-card:focus {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100%); }
 }
 
 .welcome-screen, .lobby-screen, .game-screen {

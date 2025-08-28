@@ -3,7 +3,6 @@ import { Player } from '@core/types';
 
 export class WelcomeScreen extends EventEmitter {
   render(player: Player): HTMLElement {
-    console.log('🎯 WelcomeScreen.render() called with player:', player);
     const container = document.createElement('div');
     container.className = 'welcome-screen';
     
@@ -32,18 +31,21 @@ export class WelcomeScreen extends EventEmitter {
               <div class="game-icon">🔴</div>
               <h3>Connect 4</h3>
               <p>Classic strategy game</p>
+              <div class="game-status">Available</div>
             </div>
             
             <div class="game-card" data-game="mancala">
               <div class="game-icon">🟡</div>
               <h3>Mancala</h3>
               <p>Ancient board game</p>
+              <div class="game-status coming-soon">Coming Soon</div>
             </div>
             
             <div class="game-card" data-game="tictactoe">
               <div class="game-icon">❌</div>
               <h3>Tic Tac Toe</h3>
               <p>Simple and fun</p>
+              <div class="game-status coming-soon">Coming Soon</div>
             </div>
           </div>
           
@@ -61,9 +63,7 @@ export class WelcomeScreen extends EventEmitter {
       </div>
     `;
     
-    console.log('🎯 WelcomeScreen HTML created, setting up event listeners');
     this.setupEventListeners(container);
-    console.log('🎯 WelcomeScreen.render() completed, returning container');
     return container;
   }
   
@@ -72,8 +72,14 @@ export class WelcomeScreen extends EventEmitter {
     container.querySelectorAll('.game-card').forEach(card => {
       card.addEventListener('click', () => {
         const gameType = card.getAttribute('data-game');
-        if (gameType) {
+        const statusElement = card.querySelector('.game-status');
+        const isComingSoon = statusElement?.classList.contains('coming-soon');
+        
+        if (gameType && !isComingSoon) {
           this.emit('createGame', gameType);
+        } else if (isComingSoon && gameType) {
+          // Show a subtle notification for coming soon games
+          this.showComingSoonNotification(gameType);
         }
       });
     });
@@ -86,5 +92,31 @@ export class WelcomeScreen extends EventEmitter {
     container.querySelector('#show-lobby-btn')?.addEventListener('click', () => {
       this.emit('showLobby');
     });
+  }
+  
+  private showComingSoonNotification(gameType: string): void {
+    // Create a temporary notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--color-secondary);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = `${gameType.charAt(0).toUpperCase() + gameType.slice(1)} coming soon!`;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 }

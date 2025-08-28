@@ -191,20 +191,23 @@ export class DiscordService extends EventEmitter {
     this.isDemo = true;
     this.isConnected = true;
 
+    // Generate a more realistic demo user name
+    const demoNames = [
+      'Alex', 'Jordan', 'Casey', 'Riley', 'Taylor', 'Morgan', 'Quinn', 'Avery', 'Blake', 'Drew',
+      'Sam', 'Jamie', 'Parker', 'Reese', 'Hayden', 'Peyton', 'Rowan', 'Sage', 'River', 'Sky'
+    ];
+    const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
+    
     // Create a demo user
     this.currentUser = {
       id: `demo_${Math.random().toString(36).substr(2, 9)}`,
-      username: `DemoUser${Math.floor(Math.random() * 1000)}`,
+      username: `${randomName}${Math.floor(Math.random() * 100)}`,
       discriminator: '0000',
-      globalName: 'Demo User'
+      globalName: randomName
     };
 
     console.log('🎮 Demo mode initialized');
-    console.log('🎯 DiscordService emitting connected event:', this.currentUser);
-    console.log('🎯 EventEmitter listeners for connected:', this.listenerCount('connected'));
-    console.log('🎯 EventEmitter event names:', this.eventNames());
     this.emit('connected', this.currentUser);
-    console.log('🎯 Connected event emitted successfully');
   }
 
   private hasRequiredDiscordParameters(): boolean {

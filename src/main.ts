@@ -3,7 +3,6 @@ import { App } from '@ui/App';
 import './styles/global.css';
 
 // Modern Discord Activity App
-console.log('🚀 App starting, timestamp:', Date.now());
 class DiscordGameHub {
   private gameHub: GameHub;
   private app: App;
@@ -40,16 +39,7 @@ class DiscordGameHub {
           }
         }, 2000); // Increased timeout to 2 seconds
         
-        // Direct test: Force call app.setPlayer to test if the render method works
-        setTimeout(() => {
-          console.log('🔧 Direct test: Calling app.setPlayer directly');
-          const testPlayer = {
-            id: 'test_player',
-            name: 'Test Player',
-            avatar: undefined
-          };
-          this.app.setPlayer(testPlayer);
-        }, 3000); // Test after 3 seconds
+
         
         // Additional fallback: If still on loading screen after 5 seconds, force demo mode
         setTimeout(() => {
@@ -75,20 +65,16 @@ class DiscordGameHub {
   }
 
   private setupEventHandlers(): void {
-    console.log('🎯 main.ts setupEventHandlers() called');
-    console.log('🎯 GameHub instance:', this.gameHub);
     
     // Game Hub Events
     this.gameHub.on('initialized', (data) => {
       console.log('🎮 Game Hub ready:', data);
     });
 
-    this.gameHub.on('playerConnected', (player) => {
-      console.log('👤 Player connected:', player);
-      console.log('🎯 About to call app.setPlayer with:', player);
-      this.app.setPlayer(player);
-      console.log('🎯 app.setPlayer completed');
-    });
+              this.gameHub.on('playerConnected', (player) => {
+            console.log('👤 Player connected:', player.name);
+            this.app.setPlayer(player);
+          });
 
     this.gameHub.on('playerDisconnected', () => {
       console.log('👤 Player disconnected');
