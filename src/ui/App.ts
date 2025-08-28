@@ -80,6 +80,7 @@ export class App extends EventEmitter {
 
   setPlayer(player: Player | null): void {
     console.log('🎯 App.setPlayer called with:', player);
+    console.log('🎯 Current screen before setPlayer:', this.currentScreen);
     this.currentPlayer = player;
     if (player) {
       console.log('🎯 Showing welcome screen for player:', player.name);
@@ -98,7 +99,9 @@ export class App extends EventEmitter {
     }
     console.log('🎯 Setting screen to welcome and rendering');
     this.currentScreen = 'welcome';
+    console.log('🎯 About to call render()');
     this.render();
+    console.log('🎯 render() completed');
   }
 
   showLobby(): void {
@@ -129,26 +132,46 @@ export class App extends EventEmitter {
   }
 
   private render(): void {
+    console.log('🎯 render() called with currentScreen:', this.currentScreen);
+    console.log('🎯 Container element:', this.container);
+    
     // Clear container
     this.container.innerHTML = '';
+    console.log('🎯 Container cleared');
 
     // Render current screen
     switch (this.currentScreen) {
       case 'loading':
+        console.log('🎯 Rendering loading screen');
         this.container.appendChild(this.loadingScreen.render());
         break;
       case 'welcome':
-        this.container.appendChild(this.welcomeScreen.render(this.currentPlayer!));
+        console.log('🎯 Rendering welcome screen for player:', this.currentPlayer);
+        try {
+          const welcomeElement = this.welcomeScreen.render(this.currentPlayer!);
+          console.log('🎯 Welcome screen element created:', welcomeElement);
+          this.container.appendChild(welcomeElement);
+          console.log('🎯 Welcome screen appended to container');
+        } catch (error) {
+          console.error('🎯 Error rendering welcome screen:', error);
+        }
         break;
       case 'lobby':
+        console.log('🎯 Rendering lobby screen');
         this.container.appendChild(this.lobbyScreen.render(this.currentPlayer!));
         break;
       case 'game':
+        console.log('🎯 Rendering game screen');
         this.container.appendChild(this.gameScreen.render(this.currentRoom!, this.currentPlayer!));
         break;
       case 'error':
+        console.log('🎯 Rendering error screen');
         this.container.appendChild(this.errorScreen.render());
         break;
+      default:
+        console.error('🎯 Unknown screen type:', this.currentScreen);
     }
+    
+    console.log('🎯 render() completed, container children count:', this.container.children.length);
   }
 }

@@ -3,6 +3,7 @@ import { Player } from '@core/types';
 
 export class WelcomeScreen extends EventEmitter {
   render(player: Player): HTMLElement {
+    console.log('🎯 WelcomeScreen.render() called with player:', player);
     const container = document.createElement('div');
     container.className = 'welcome-screen';
     
@@ -60,7 +61,9 @@ export class WelcomeScreen extends EventEmitter {
       </div>
     `;
     
+    console.log('🎯 WelcomeScreen HTML created, setting up event listeners');
     this.setupEventListeners(container);
+    console.log('🎯 WelcomeScreen.render() completed, returning container');
     return container;
   }
   
