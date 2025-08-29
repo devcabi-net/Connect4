@@ -79,11 +79,14 @@ export class App extends EventEmitter {
   }
 
   setPlayer(player: Player | null): void {
+    console.log('🎯 App.setPlayer called with:', player);
     this.currentPlayer = player;
     if (player) {
       // Update page title with player name
       document.title = `Discord Game Hub - ${player.name}`;
+      console.log('🎯 About to call showWelcome');
       this.showWelcome();
+      console.log('🎯 showWelcome completed');
     } else {
       document.title = 'Discord Game Hub - Play Games with Friends';
       this.showError('Player disconnected');
@@ -91,12 +94,17 @@ export class App extends EventEmitter {
   }
 
   showWelcome(): void {
+    console.log('🎯 showWelcome called, currentPlayer:', this.currentPlayer);
     if (!this.currentPlayer) {
+      console.log('🎯 No current player, returning early');
       return;
     }
+    console.log('🎯 Setting screen to welcome and rendering');
     this.currentScreen = 'welcome';
     document.title = `Discord Game Hub - ${this.currentPlayer.name}`;
+    console.log('🎯 About to call render()');
     this.render();
+    console.log('🎯 render() completed');
   }
 
   showLobby(): void {
@@ -129,18 +137,22 @@ export class App extends EventEmitter {
   }
 
   private render(): void {
+    console.log('🎯 render() called with currentScreen:', this.currentScreen);
     // Clear container
     this.container.innerHTML = '';
 
     // Render current screen
     switch (this.currentScreen) {
       case 'loading':
+        console.log('🎯 Rendering loading screen');
         this.container.appendChild(this.loadingScreen.render());
         break;
       case 'welcome':
+        console.log('🎯 Rendering welcome screen for player:', this.currentPlayer);
         try {
           const welcomeElement = this.welcomeScreen.render(this.currentPlayer!);
           this.container.appendChild(welcomeElement);
+          console.log('🎯 Welcome screen rendered successfully');
         } catch (error) {
           console.error('Error rendering welcome screen:', error);
         }

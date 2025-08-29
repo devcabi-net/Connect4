@@ -65,16 +65,19 @@ class DiscordGameHub {
   }
 
   private setupEventHandlers(): void {
+    console.log('🎯 Setting up event handlers...');
     
     // Game Hub Events
     this.gameHub.on('initialized', (data) => {
       console.log('🎮 Game Hub ready:', data);
     });
 
-              this.gameHub.on('playerConnected', (player) => {
-            console.log('👤 Player connected:', player.name);
-            this.app.setPlayer(player);
-          });
+    this.gameHub.on('playerConnected', (player) => {
+      console.log('👤 Player connected:', player.name);
+      console.log('🎯 About to call app.setPlayer with:', player);
+      this.app.setPlayer(player);
+      console.log('🎯 app.setPlayer completed');
+    });
 
     this.gameHub.on('playerDisconnected', () => {
       console.log('👤 Player disconnected');
