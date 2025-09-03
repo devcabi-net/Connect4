@@ -1,0 +1,76 @@
+{
+  "name": "Connect 4 Game Hub",
+  "description": "Play Connect 4 and other board games with friends in Discord voice channels!",
+  "type": "activity",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "homepage_url": "https://your-domain.com",
+  "support_url": "https://your-domain.com/support",
+  "privacy_policy_url": "https://your-domain.com/privacy",
+  "terms_of_service_url": "https://your-domain.com/terms",
+  "summary": "A multiplayer Connect 4 game designed specifically for Discord voice channels",
+  "description_localizations": {
+    "en-US": "Play Connect 4 and other board games with friends in Discord voice channels!",
+    "es-ES": "¡Juega Connect 4 y otros juegos de mesa con amigos en canales de voz de Discord!",
+    "fr": "Jouez à Connect 4 et à d'autres jeux de société avec des amis dans les canaux vocaux Discord !",
+    "de": "Spiele Connect 4 und andere Brettspiele mit Freunden in Discord-Sprachkanälen!",
+    "it": "Gioca a Connect 4 e altri giochi da tavolo con amici nei canali vocali di Discord!",
+    "pt-BR": "Jogue Connect 4 e outros jogos de tabuleiro com amigos em canais de voz do Discord!",
+    "ja": "Discordのボイスチャンネルで友達とConnect 4やその他のボードゲームをプレイしましょう！",
+    "ko": "Discord 음성 채널에서 친구들과 Connect 4 및 기타 보드 게임을 플레이하세요!",
+    "zh-CN": "在Discord语音频道中与朋友一起玩Connect 4和其他棋盘游戏！",
+    "zh-TW": "在Discord語音頻道中與朋友一起玩Connect 4和其他棋盤遊戲！"
+  },
+  "summary_localizations": {
+    "en-US": "A multiplayer Connect 4 game designed specifically for Discord voice channels",
+    "es-ES": "Un juego multijugador de Connect 4 diseñado específicamente para canales de voz de Discord",
+    "fr": "Un jeu Connect 4 multijoueur conçu spécifiquement pour les canaux vocaux Discord",
+    "de": "Ein Multiplayer-Connect-4-Spiel, das speziell für Discord-Sprachkanäle entwickelt wurde",
+    "it": "Un gioco Connect 4 multigiocatore progettato specificamente per i canali vocali di Discord",
+    "pt-BR": "Um jogo multijogador Connect 4 projetado especificamente para canais de voz do Discord",
+    "ja": "Discordのボイスチャンネル専用に設計されたマルチプレイヤーConnect 4ゲーム",
+    "ko": "Discord 음성 채널을 위해 특별히 설계된 멀티플레이어 Connect 4 게임",
+    "zh-CN": "专为Discord语音频道设计的多人在线Connect 4游戏",
+    "zh-TW": "專為Discord語音頻道設計的多人在線Connect 4遊戲"
+  },
+  "category": "games",
+  "tags": ["connect4", "board-games", "multiplayer", "voice-channels"],
+  "install_params": {
+    "scopes": ["identify", "guilds", "rpc.activities.write"],
+    "permissions": []
+  },
+  "flags": 0,
+  "content_rating": {
+    "type": "everyone",
+    "descriptors": []
+  },
+  "supported_platforms": ["desktop", "web", "mobile"],
+  "supported_locales": ["en-US", "es-ES", "fr", "de", "it", "pt-BR", "ja", "ko", "zh-CN", "zh-TW"],
+  "features": ["voice-channels", "multiplayer", "real-time", "cross-platform"],
+  "screenshots": [
+    {
+      "url": "https://your-domain.com/screenshots/gameplay.png",
+      "alt": "Connect 4 gameplay screenshot"
+    },
+    {
+      "url": "https://your-domain.com/screenshots/lobby.png",
+      "alt": "Game lobby screenshot"
+    }
+  ],
+  "videos": [
+    {
+      "url": "https://your-domain.com/videos/demo.mp4",
+      "alt": "Game demonstration video"
+    }
+  ],
+  "external_url": "https://your-domain.com",
+  "bot_public": false,
+  "bot_require_code_grant": false,
+  "verify_key": "your-verify-key-here",
+  "interactions_endpoint_url": "https://your-domain.com/api/interactions",
+  "embedded_activity_config": {
+    "invite_url": "https://your-domain.com/invite",
+    "launch_url": "https://your-domain.com/launch",
+    "fallback_url": "https://your-domain.com/fallback"
+  }
+}

@@ -37,64 +37,100 @@ export class DiscordService extends EventEmitter {
       
       // Step 1: Initialize Discord SDK
       try {
+        console.log('🎯 Creating Discord SDK instance with client ID:', this.config.clientId);
         this.sdk = new DiscordSDK(this.config.clientId);
         console.log('✅ Discord SDK instance created');
         
         // Step 2: Wait for SDK to be ready
         console.log('⏳ Waiting for Discord SDK to be ready...');
-        await this.sdk.ready();
-        console.log('✅ Discord SDK is ready');
+        try {
+          await this.sdk.ready();
+          console.log('✅ Discord SDK is ready');
+        } catch (readyError) {
+          console.error('❌ Discord SDK ready() failed:', readyError);
+          throw new Error(`SDK ready failed: ${readyError}`);
+        }
         
         // Step 3: Start OAuth2 authorization flow
         console.log('🔐 Starting OAuth2 authorization flow...');
-        const { code } = await this.sdk.commands.authorize({
+        console.log('🔐 Authorization parameters:', {
           client_id: this.config.clientId,
           response_type: 'code',
           state: '',
           prompt: 'none',
-          scope: this.config.scopes as any, // Cast to any for SDK compatibility
+          scope: this.config.scopes
         });
         
-        console.log('✅ Authorization code received:', code ? 'YES' : 'NO');
-        
-        if (!code) {
-          throw new Error('No authorization code received from Discord');
+        let code: string;
+        try {
+          const authResponse = await this.sdk.commands.authorize({
+            client_id: this.config.clientId,
+            response_type: 'code',
+            state: '',
+            prompt: 'none',
+            scope: this.config.scopes as any, // Cast to any for SDK compatibility
+          });
+          
+          code = authResponse.code;
+          console.log('✅ Authorization code received:', code ? 'YES' : 'NO');
+          
+          if (!code) {
+            throw new Error('No authorization code received from Discord');
+          }
+        } catch (authError) {
+          console.error('❌ Discord authorization failed:', authError);
+          throw new Error(`Authorization failed: ${authError}`);
         }
         
         // Step 4: Exchange code for access token
         console.log('🔑 Exchanging authorization code for access token...');
-        const tokenResponse = await fetch('/.proxy/api/discord-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ code }),
-        });
+        let access_token: string;
         
-        if (!tokenResponse.ok) {
-          const errorText = await tokenResponse.text();
-          throw new Error(`Token exchange failed: ${tokenResponse.status} - ${errorText}`);
-        }
-        
-        const { access_token } = await tokenResponse.json();
-        console.log('✅ Access token received:', access_token ? 'YES' : 'NO');
-        
-        if (!access_token) {
-          throw new Error('No access token received from token exchange');
+        try {
+          const tokenResponse = await fetch('/.proxy/api/discord-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+          });
+          
+          if (!tokenResponse.ok) {
+            const errorText = await tokenResponse.text();
+            throw new Error(`Token exchange failed: ${tokenResponse.status} - ${errorText}`);
+          }
+          
+          const tokenData = await tokenResponse.json();
+          access_token = tokenData.access_token;
+          console.log('✅ Access token received:', access_token ? 'YES' : 'NO');
+          
+          if (!access_token) {
+            throw new Error('No access token received from token exchange');
+          }
+        } catch (tokenError) {
+          console.error('❌ Token exchange failed:', tokenError);
+          throw new Error(`Token exchange failed: ${tokenError}`);
         }
         
         // Step 5: Authenticate with Discord using access token
         console.log('🎯 Authenticating with Discord using access token...');
-        const auth = await this.sdk.commands.authenticate({
-          access_token,
-        });
+        let auth: any;
         
-        if (auth == null) {
-          throw new Error('Discord authenticate() returned null');
-        }
-        
-        if (!auth.user) {
-          throw new Error('Discord authenticate() did not return user information');
+        try {
+          auth = await this.sdk.commands.authenticate({
+            access_token,
+          });
+          
+          if (auth == null) {
+            throw new Error('Discord authenticate() returned null');
+          }
+          
+          if (!auth.user) {
+            throw new Error('Discord authenticate() did not return user information');
+          }
+        } catch (authError) {
+          console.error('❌ Discord authentication failed:', authError);
+          throw new Error(`Authentication failed: ${authError}`);
         }
         
         console.log('✅ Discord authentication successful');
@@ -169,35 +205,70 @@ export class DiscordService extends EventEmitter {
     try {
       console.log('🔍 Checking if running in Discord...');
       
-      // Check URL parameters for Discord indicators
+      // Check URL parameters for Discord Activity launch indicators
+      // According to Discord docs: https://discord.com/developers/docs/activities/building-an-activity
       const urlParams = new URLSearchParams(window.location.search);
-      const hasDiscordParams = urlParams.has('frame_id') || 
-                              urlParams.has('instance_id') || 
-                              urlParams.has('channel_id') || 
-                              urlParams.has('guild_id') ||
-                              urlParams.has('activity_id') ||
-                              urlParams.has('application_id') ||
-                              urlParams.has('launch_id');
       
-      // Check if running in Discord iframe
+      // Critical Discord Activity parameters
+      const hasFrameId = urlParams.has('frame_id');
+      const hasInstanceId = urlParams.has('instance_id');
+      const hasChannelId = urlParams.has('channel_id');
+      const hasGuildId = urlParams.has('guild_id');
+      const hasActivityId = urlParams.has('activity_id');
+      const hasApplicationId = urlParams.has('application_id');
+      const hasLaunchId = urlParams.has('launch_id');
+      
+      // Check if running in Discord iframe (most reliable indicator)
       const isInDiscordFrame = window.self !== window.top;
       
-      // Check for Discord domain
+      // Check for Discord domains
       const hasDiscordDomain = window.location.hostname.includes('discord') ||
                               window.location.hostname.includes('discordsays.com');
       
-      // Check referrer
+      // Check referrer for Discord
       const hasDiscordReferrer = document.referrer.includes('discord');
       
-      const isDiscord = hasDiscordParams || isInDiscordFrame || hasDiscordDomain || hasDiscordReferrer;
+      // Check for Discord user agent (mobile apps)
+      const hasDiscordUserAgent = navigator.userAgent.includes('Discord');
+      
+      // Check for Discord environment variables
+      const hasDiscordEnv = typeof window !== 'undefined' && 
+                           (window as any).DiscordNative !== undefined;
+      
+      // Discord Activity detection logic
+      // Must have at least one of these indicators to be considered a Discord Activity
+      const hasDiscordActivityParams = hasFrameId || hasInstanceId || hasChannelId || 
+                                     hasGuildId || hasActivityId || hasApplicationId || 
+                                     hasLaunchId;
+      
+      const isDiscord = hasDiscordActivityParams || isInDiscordFrame || hasDiscordDomain || 
+                       hasDiscordReferrer || hasDiscordUserAgent || hasDiscordEnv;
       
       console.log('🔍 Discord detection results:', {
-        hasDiscordParams,
+        // Activity parameters
+        hasFrameId,
+        hasInstanceId,
+        hasChannelId,
+        hasGuildId,
+        hasActivityId,
+        hasApplicationId,
+        hasLaunchId,
+        hasDiscordActivityParams,
+        
+        // Environment indicators
         isInDiscordFrame,
         hasDiscordDomain,
         hasDiscordReferrer,
+        hasDiscordUserAgent,
+        hasDiscordEnv,
+        
+        // Final result
         finalResult: isDiscord
       });
+      
+      // Log URL for debugging
+      console.log('🔍 Current URL:', window.location.href);
+      console.log('🔍 URL parameters:', Object.fromEntries(urlParams.entries()));
       
       return isDiscord;
       
