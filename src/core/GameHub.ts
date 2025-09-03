@@ -52,8 +52,10 @@ export class GameHub extends EventEmitter {
     try {
       console.log('🚀 Initializing Game Hub...');
       console.log('Environment Check:', {
-        discordClientId: import.meta.env.VITE_DISCORD_CLIENT_ID ? 'Set' : 'Not Set',
-        forceDiscordMode: import.meta.env.VITE_FORCE_DISCORD_MODE
+        discordClientId: import.meta.env.VITE_DISCORD_CLIENT_ID || 'Using fallback: 1407945986424307713',
+        actualClientId: this.discordService.getCurrentUser() ? 'Service initialized' : 'Using configured client ID',
+        forceDiscordMode: import.meta.env.VITE_FORCE_DISCORD_MODE || 'false',
+        environment: import.meta.env.MODE || 'unknown'
       });
       
       // Initialize Discord connection with timeout

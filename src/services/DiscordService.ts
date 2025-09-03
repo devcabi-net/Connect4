@@ -38,6 +38,13 @@ export class DiscordService extends EventEmitter {
       // Step 1: Initialize Discord SDK
       try {
         console.log('🎯 Creating Discord SDK instance with client ID:', this.config.clientId);
+        console.log('🔧 Environment variables:', {
+          VITE_DISCORD_CLIENT_ID: import.meta.env.VITE_DISCORD_CLIENT_ID,
+          VITE_FORCE_DISCORD_MODE: import.meta.env.VITE_FORCE_DISCORD_MODE,
+          MODE: import.meta.env.MODE,
+          PROD: import.meta.env.PROD,
+          DEV: import.meta.env.DEV
+        });
         this.sdk = new DiscordSDK(this.config.clientId);
         console.log('✅ Discord SDK instance created');
         
