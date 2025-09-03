@@ -22,6 +22,7 @@ export class GameHub extends EventEmitter {
 
   private setupEventHandlers(): void {
     console.log('🎯 GameHub setting up event handlers');
+    
     // Discord events
     this.discordService.on('connected', (user) => {
       console.log('🎯 GameHub received connected event from DiscordService:', user);
@@ -35,8 +36,15 @@ export class GameHub extends EventEmitter {
     });
 
     this.discordService.on('disconnected', () => {
+      console.log('🎯 GameHub received disconnected event from DiscordService');
       this.currentPlayer = null;
       this.emit('playerDisconnected');
+    });
+    
+    // Debug: Check if events are properly bound
+    console.log('🎯 GameHub event handlers set up. Discord service listeners:', {
+      hasConnectedListener: this.discordService.listenerCount('connected'),
+      hasDisconnectedListener: this.discordService.listenerCount('disconnected')
     });
   }
 

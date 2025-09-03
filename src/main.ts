@@ -25,9 +25,25 @@ class DiscordGameHub {
         console.log('✅ Game Hub initialized successfully');
         this.app.show();
         
-        // If no player is connected after initialization, create a demo player
+        // Immediate check for player connection
+        const immediatePlayer = this.gameHub.getCurrentPlayer();
+        console.log('🔍 Immediate check after initialization - Current player:', immediatePlayer);
+        
+        // If no player is connected immediately, create a demo player right away
+        if (!immediatePlayer) {
+          console.log('🔧 No player connected immediately, creating demo player now');
+          const demoPlayer = {
+            id: `demo_${Math.random().toString(36).substr(2, 9)}`,
+            name: `DemoUser${Math.floor(Math.random() * 1000)}`,
+            avatar: undefined
+          };
+          this.app.setPlayer(demoPlayer);
+        }
+        
+        // Fallback timeout as backup
         setTimeout(() => {
           const currentPlayer = this.gameHub.getCurrentPlayer();
+          console.log('🔍 First timeout check - Current player:', currentPlayer);
           if (!currentPlayer) {
             console.log('🔧 No player connected, creating demo player');
             const demoPlayer = {
@@ -42,6 +58,7 @@ class DiscordGameHub {
         // Additional fallback: If still on loading screen after 8 seconds, force demo mode
         setTimeout(() => {
           const currentPlayer = this.gameHub.getCurrentPlayer();
+          console.log('🔍 Second timeout check - Current player:', currentPlayer);
           if (!currentPlayer) {
             console.log('🔧 Force fallback: Creating demo player after timeout');
             const demoPlayer = {

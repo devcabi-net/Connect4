@@ -31,14 +31,8 @@ export class DiscordService extends EventEmitter {
         return true;
       }
 
-      // Additional check: Only initialize Discord SDK if we have the required frame parameters
-      const hasRequiredDiscordParams = this.hasRequiredDiscordParameters();
-      
-      if (!hasRequiredDiscordParams) {
-        console.log('🔧 Discord detected but missing required parameters - falling back to demo mode');
-        await this.initializeDemoMode();
-        return true;
-      }
+      // Simplified Discord detection - if we're here, we should try Discord
+      console.log('🔧 Discord mode detected, proceeding with Discord SDK initialization');
 
       console.log('🎯 Initializing Discord SDK...');
       console.log('SDK Import check:', typeof DiscordSDK);
@@ -138,7 +132,9 @@ export class DiscordService extends EventEmitter {
           await this.setupActivity();
           
           this.isConnected = true;
+          console.log('🎯 DiscordService about to emit connected event. Current listeners:', this.listenerCount('connected'));
           this.emit('connected', this.currentUser);
+          console.log('🎯 DiscordService connected event emitted');
           
           console.log(`✅ Discord connected: ${this.currentUser.username}`);
           return true;
@@ -206,56 +202,12 @@ export class DiscordService extends EventEmitter {
     };
 
     console.log('🎮 Demo mode initialized');
-    console.log('🎯 DiscordService emitting connected event:', this.currentUser);
+    console.log('🎯 DiscordService about to emit connected event. Current listeners:', this.listenerCount('connected'));
     this.emit('connected', this.currentUser);
     console.log('🎯 Connected event emitted successfully');
   }
 
-  private hasRequiredDiscordParameters(): boolean {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      
-      // Discord SDK requires these specific parameters to work properly
-      const hasFrameId = urlParams.has('frame_id');
-      const hasInstanceId = urlParams.has('instance_id');
-      const hasChannelId = urlParams.has('channel_id');
-      const hasGuildId = urlParams.has('guild_id');
-      
-      // Check if we're in a Discord iframe
-      const isInDiscordFrame = typeof window !== 'undefined' && window.self !== window.top;
-      
-      // Check for Discord Activity specific parameters
-      const hasActivityId = urlParams.has('activity_id');
-      const hasApplicationId = urlParams.has('application_id');
-      const hasLaunchId = urlParams.has('launch_id');
-      
-      // Check for discordsays.com domain (Discord Activity URLs)
-      const isDiscordSaysDomain = window.location.hostname.includes('discordsays.com');
-      
-      console.log('🔍 Required Discord Parameters Check:', {
-        hasFrameId,
-        hasInstanceId,
-        hasChannelId,
-        hasGuildId,
-        isInDiscordFrame,
-        hasActivityId,
-        hasApplicationId,
-        hasLaunchId,
-        isDiscordSaysDomain,
-        hasRequiredParams: hasFrameId || hasInstanceId || hasChannelId || hasGuildId || 
-                          isInDiscordFrame || hasActivityId || hasApplicationId || 
-                          hasLaunchId || isDiscordSaysDomain
-      });
-      
-      // Return true if we have the essential Discord parameters
-      return hasFrameId || hasInstanceId || hasChannelId || hasGuildId || 
-             isInDiscordFrame || hasActivityId || hasApplicationId || 
-             hasLaunchId || isDiscordSaysDomain;
-    } catch (error) {
-      console.error('Error checking required Discord parameters:', error);
-      return false;
-    }
-  }
+
 
   private isRunningInDiscord(): boolean {
     try {
