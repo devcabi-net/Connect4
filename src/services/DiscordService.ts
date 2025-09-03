@@ -24,11 +24,19 @@ export class DiscordService extends EventEmitter {
     try {
       console.log('🚀 DiscordService.initialize() called');
       
-      // Check if we should use Discord mode
-      const shouldUseDiscord = this.isRunningInDiscord() || this.config.forceDiscordMode;
+      // In production, always try Discord mode first unless explicitly disabled
+      const isProduction = import.meta.env.PROD || window.location.hostname.includes('netlify.app');
+      const shouldUseDiscord = this.isRunningInDiscord() || this.config.forceDiscordMode || isProduction;
+      
+      console.log('🔧 Discord mode decision:', {
+        isRunningInDiscord: this.isRunningInDiscord(),
+        forceDiscordMode: this.config.forceDiscordMode,
+        isProduction,
+        shouldUseDiscord
+      });
       
       if (!shouldUseDiscord) {
-        console.log('🔧 Not running in Discord - falling back to demo mode');
+        console.log('🔧 Not using Discord mode - falling back to demo mode');
         await this.initializeDemoMode();
         return true;
       }
@@ -242,14 +250,18 @@ export class DiscordService extends EventEmitter {
       const hasDiscordEnv = typeof window !== 'undefined' && 
                            (window as any).DiscordNative !== undefined;
       
+      // Check if this looks like a Discord Activity launch
+      // Activities are often launched with specific referrers or in iframes
+      const hasDiscordActivityIndicators = isInDiscordFrame || hasDiscordReferrer || 
+                                          hasDiscordDomain || hasDiscordUserAgent;
+      
       // Discord Activity detection logic
-      // Must have at least one of these indicators to be considered a Discord Activity
       const hasDiscordActivityParams = hasFrameId || hasInstanceId || hasChannelId || 
                                      hasGuildId || hasActivityId || hasApplicationId || 
                                      hasLaunchId;
       
-      const isDiscord = hasDiscordActivityParams || isInDiscordFrame || hasDiscordDomain || 
-                       hasDiscordReferrer || hasDiscordUserAgent || hasDiscordEnv;
+      // Be more permissive - if we have any Discord indicators, try Discord mode
+      const isDiscord = hasDiscordActivityParams || hasDiscordActivityIndicators || hasDiscordEnv;
       
       console.log('🔍 Discord detection results:', {
         // Activity parameters
@@ -268,6 +280,7 @@ export class DiscordService extends EventEmitter {
         hasDiscordReferrer,
         hasDiscordUserAgent,
         hasDiscordEnv,
+        hasDiscordActivityIndicators,
         
         // Final result
         finalResult: isDiscord
@@ -276,6 +289,7 @@ export class DiscordService extends EventEmitter {
       // Log URL for debugging
       console.log('🔍 Current URL:', window.location.href);
       console.log('🔍 URL parameters:', Object.fromEntries(urlParams.entries()));
+      console.log('🔍 Document referrer:', document.referrer);
       
       return isDiscord;
       
