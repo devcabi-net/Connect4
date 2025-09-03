@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord SDK Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #2c2f33;
+            color: #ffffff;
+        }
+        .test-section {
+            background: #36393f;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #5865f2;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #43b581; }
+        .error { background: #f04747; }
+        .warning { background: #faa61a; }
+        .info { background: #5865f2; }
+        button {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #4752c4; }
+        button:disabled { background: #72767d; cursor: not-allowed; }
+        .log {
+            background: #2f3136;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Discord SDK Connection Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Environment Check</h2>
+        <div id="env-status"></div>
+        <button onclick="checkEnvironment()">Check Environment</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Discord SDK Test</h2>
+        <div id="sdk-status"></div>
+        <button onclick="testDiscordSDK()" id="sdk-test-btn">Test Discord SDK</button>
+        <button onclick="forceDemoMode()" id="demo-btn">Force Demo Mode</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Connection Status</h2>
+        <div id="connection-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📝 Console Logs</h2>
+        <div id="console-log" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToLog(level, ...args) {
+            const logDiv = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            logDiv.textContent += `[${timestamp}] ${level}: ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog('LOG', ...args);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog('ERROR', ...args);
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog('WARN', ...args);
+        };
+        
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function checkEnvironment() {
+            console.log('🔍 Checking environment...');
+            
+            const envInfo = {
+                userAgent: navigator.userAgent,
+                url: window.location.href,
+                protocol: window.location.protocol,
+                hostname: window.location.hostname,
+                port: window.location.port,
+                hasDiscordSDK: typeof window !== 'undefined' && 'DiscordSDK' in window,
+                isInFrame: window.self !== window.top,
+                referrer: document.referrer
+            };
+            
+            console.log('Environment info:', envInfo);
+            
+            let status = '✅ Environment check completed';
+            let type = 'success';
+            
+            if (envInfo.hasDiscordSDK) {
+                status += '<br>🎯 Discord SDK detected in global scope';
+            } else {
+                status += '<br>⚠️ Discord SDK not found in global scope';
+                type = 'warning';
+            }
+            
+            if (envInfo.isInFrame) {
+                status += '<br>🖼️ Running in iframe (possible Discord context)';
+            } else {
+                status += '<br>🌐 Running in main window';
+            }
+            
+            updateStatus('env-status', status, type);
+        }
+        
+        async function testDiscordSDK() {
+            console.log('🎯 Testing Discord SDK...');
+            
+            try {
+                // Check if DiscordSDK is available
+                if (typeof DiscordSDK === 'undefined') {
+                    throw new Error('DiscordSDK is not available');
+                }
+                
+                console.log('✅ DiscordSDK found:', typeof DiscordSDK);
+                
+                // Try to create an instance
+                const sdk = new DiscordSDK('1407945986424307713');
+                console.log('✅ Discord SDK instance created');
+                
+                // Try to make it ready
+                console.log('⏳ Waiting for SDK to be ready...');
+                await sdk.ready();
+                console.log('✅ Discord SDK is ready');
+                
+                // Try to authenticate
+                console.log('🔐 Attempting authentication...');
+                const auth = await sdk.commands.authenticate({});
+                console.log('✅ Authentication successful:', auth);
+                
+                updateStatus('sdk-status', '✅ Discord SDK test successful!', 'success');
+                
+            } catch (error) {
+                console.error('❌ Discord SDK test failed:', error);
+                updateStatus('sdk-status', `❌ Discord SDK test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function forceDemoMode() {
+            console.log('🎮 Forcing demo mode...');
+            updateStatus('connection-status', '🎮 Demo mode activated - simulating user connection', 'info');
+            
+            // Simulate a successful connection after a delay
+            setTimeout(() => {
+                updateStatus('connection-status', '✅ Demo user connected successfully!', 'success');
+            }, 1000);
+        }
+        
+        function clearLog() {
+            document.getElementById('console-log').textContent = '';
+        }
+        
+        // Auto-check environment on load
+        window.addEventListener('load', () => {
+            console.log('🚀 Discord SDK Test Page Loaded');
+            checkEnvironment();
+        });
+    </script>
+</body>
+</html>

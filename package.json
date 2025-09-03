@@ -25,7 +25,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@discord/embedded-app-sdk": "^1.0.0",
+    "@discord/embedded-app-sdk": "^2.4.0",
     "@supabase/supabase-js": "^2.56.0",
     "nanoid": "^5.0.4"
   },

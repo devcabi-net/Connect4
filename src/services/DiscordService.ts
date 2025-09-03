@@ -82,7 +82,7 @@ export class DiscordService extends EventEmitter {
           client_id: this.config.clientId,
           response_type: 'code',
           state: '',
-          prompt: 'consent' as any, // Force authorization prompt
+          prompt: 'none', // Changed from 'consent' to 'none' as per Discord examples
           scope: this.config.scopes as any, // Cast to any for SDK compatibility
         });
         
@@ -114,6 +114,10 @@ export class DiscordService extends EventEmitter {
           access_token,
         });
         
+        if (auth == null) {
+          throw new Error('Authenticate command failed');
+        }
+        
         console.log('✅ Authentication successful');
         
         // Extract user information from auth response
@@ -135,11 +139,6 @@ export class DiscordService extends EventEmitter {
           
           this.isConnected = true;
           this.emit('connected', this.currentUser);
-          
-          // Set global flag to prevent HTML fallback from overriding successful auth
-          if (typeof window !== 'undefined') {
-            (window as any).discordUserConnected = true;
-          }
           
           console.log(`✅ Discord connected: ${this.currentUser.username}`);
           return true;

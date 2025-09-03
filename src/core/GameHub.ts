@@ -48,9 +48,20 @@ export class GameHub extends EventEmitter {
         forceDiscordMode: import.meta.env.VITE_FORCE_DISCORD_MODE
       });
       
-      // Initialize Discord connection
+      // Initialize Discord connection with timeout
       console.log('🎮 Initializing Discord service...');
-      const discordConnected = await this.discordService.initialize();
+      const discordInitPromise = this.discordService.initialize();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Discord initialization timeout')), 12000)
+      );
+      
+      let discordConnected = false;
+      try {
+        discordConnected = await Promise.race([discordInitPromise, timeoutPromise]) as boolean;
+      } catch (timeoutError) {
+        console.warn('⚠️ Discord initialization timed out, continuing with demo mode');
+        discordConnected = false;
+      }
       
       console.log(`✅ Game Hub initialized (Discord: ${discordConnected ? 'Connected' : 'Demo Mode'})`);
       this.emit('initialized', { 
