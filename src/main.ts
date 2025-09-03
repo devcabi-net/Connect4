@@ -25,25 +25,10 @@ class DiscordGameHub {
         console.log('✅ Game Hub initialized successfully');
         this.app.show();
         
-        // Immediate check for player connection
-        const immediatePlayer = this.gameHub.getCurrentPlayer();
-        console.log('🔍 Immediate check after initialization - Current player:', immediatePlayer);
-        
-        // If no player is connected immediately, create a demo player right away
-        if (!immediatePlayer) {
-          console.log('🔧 No player connected immediately, creating demo player now');
-          const demoPlayer = {
-            id: `demo_${Math.random().toString(36).substr(2, 9)}`,
-            name: `DemoUser${Math.floor(Math.random() * 1000)}`,
-            avatar: undefined
-          };
-          this.app.setPlayer(demoPlayer);
-        }
-        
-        // Fallback timeout as backup
+        // Simple fallback: If no player connected after 5 seconds, create demo player
         setTimeout(() => {
           const currentPlayer = this.gameHub.getCurrentPlayer();
-          console.log('🔍 First timeout check - Current player:', currentPlayer);
+          console.log('🔍 Fallback check - Current player:', currentPlayer);
           if (!currentPlayer) {
             console.log('🔧 No player connected, creating demo player');
             const demoPlayer = {
@@ -53,22 +38,7 @@ class DiscordGameHub {
             };
             this.app.setPlayer(demoPlayer);
           }
-        }, 3000); // Increased timeout to 3 seconds
-        
-        // Additional fallback: If still on loading screen after 8 seconds, force demo mode
-        setTimeout(() => {
-          const currentPlayer = this.gameHub.getCurrentPlayer();
-          console.log('🔍 Second timeout check - Current player:', currentPlayer);
-          if (!currentPlayer) {
-            console.log('🔧 Force fallback: Creating demo player after timeout');
-            const demoPlayer = {
-              id: `demo_${Math.random().toString(36).substr(2, 9)}`,
-              name: `DemoUser${Math.floor(Math.random() * 1000)}`,
-              avatar: undefined
-            };
-            this.app.setPlayer(demoPlayer);
-          }
-        }, 8000);
+        }, 5000);
       } else {
         console.error('❌ Failed to initialize Game Hub');
         this.app.showError('Failed to initialize. Please reload the activity.');
