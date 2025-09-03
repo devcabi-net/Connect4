@@ -13,7 +13,7 @@ Based on [Discord's Official Documentation](https://discord.com/developers/docs/
 ### **2. OAuth2 Configuration**
 - [ ] Go to **OAuth2** tab in your Discord application
 - [ ] Add redirect URLs:
-  - `https://your-domain.com/`
+  - `https://disconnect4.netlify.app/`
   - `https://discord.com/oauth2/authorize`
 - [ ] Select required scopes: `identify`, `guilds`, `rpc.activities.write`
 
@@ -23,7 +23,7 @@ Based on [Discord's Official Documentation](https://discord.com/developers/docs/
 - [ ] Configure **Activity Metadata**:
   - Name: "Connect 4 Game Hub"
   - Description: "Play Connect 4 with friends in voice channels"
-  - Activity URL: `https://your-domain.com/`
+  - Activity URL: `https://disconnect4.netlify.app/`
 
 ## 🔧 **Implementation Requirements**
 
@@ -50,7 +50,7 @@ const { code } = await discordSdk.commands.authorize({
 });
 
 // Step 2: Exchange code for token (server-side)
-const response = await fetch('/api/token', {
+const response = await fetch('/.proxy/api/discord-token', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ code }),

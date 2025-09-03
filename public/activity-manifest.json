@@ -4,10 +4,10 @@
   "type": "activity",
   "version": "1.0.0",
   "author": "Your Name",
-  "homepage_url": "https://your-domain.com",
-  "support_url": "https://your-domain.com/support",
-  "privacy_policy_url": "https://your-domain.com/privacy",
-  "terms_of_service_url": "https://your-domain.com/terms",
+  "homepage_url": "https://disconnect4.netlify.app",
+  "support_url": "https://disconnect4.netlify.app/support",
+  "privacy_policy_url": "https://disconnect4.netlify.app/privacy",
+  "terms_of_service_url": "https://disconnect4.netlify.app/terms",
   "summary": "A multiplayer Connect 4 game designed specifically for Discord voice channels",
   "description_localizations": {
     "en-US": "Play Connect 4 and other board games with friends in Discord voice channels!",
@@ -49,28 +49,28 @@
   "features": ["voice-channels", "multiplayer", "real-time", "cross-platform"],
   "screenshots": [
     {
-      "url": "https://your-domain.com/screenshots/gameplay.png",
+      "url": "https://disconnect4.netlify.app/screenshots/gameplay.png",
       "alt": "Connect 4 gameplay screenshot"
     },
     {
-      "url": "https://your-domain.com/screenshots/lobby.png",
+      "url": "https://disconnect4.netlify.app/screenshots/lobby.png",
       "alt": "Game lobby screenshot"
     }
   ],
   "videos": [
     {
-      "url": "https://your-domain.com/videos/demo.mp4",
+      "url": "https://disconnect4.netlify.app/videos/demo.mp4",
       "alt": "Game demonstration video"
     }
   ],
-  "external_url": "https://your-domain.com",
+  "external_url": "https://disconnect4.netlify.app",
   "bot_public": false,
   "bot_require_code_grant": false,
   "verify_key": "your-verify-key-here",
-  "interactions_endpoint_url": "https://your-domain.com/api/interactions",
+  "interactions_endpoint_url": "https://disconnect4.netlify.app/api/interactions",
   "embedded_activity_config": {
-    "invite_url": "https://your-domain.com/invite",
-    "launch_url": "https://your-domain.com/launch",
-    "fallback_url": "https://your-domain.com/fallback"
+    "invite_url": "https://disconnect4.netlify.app/invite",
+    "launch_url": "https://disconnect4.netlify.app/launch",
+    "fallback_url": "https://disconnect4.netlify.app/fallback"
   }
 }
