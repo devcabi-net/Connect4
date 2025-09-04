@@ -24,8 +24,8 @@ export class DiscordService extends EventEmitter {
     try {
       console.log('🚀 DiscordService.initialize() called');
       
-      // In production, always try Discord mode first unless explicitly disabled
-      const isProduction = import.meta.env.PROD || window.location.hostname.includes('netlify.app');
+      // In production, ALWAYS force Discord mode - no demo mode allowed
+      const isProduction = import.meta.env.PROD || window.location.hostname.includes('netlify.app') || window.location.hostname.includes('disconnect4');
       const shouldUseDiscord = this.isRunningInDiscord() || this.config.forceDiscordMode || isProduction;
       
       console.log('🔧 Discord mode decision:', {
@@ -178,16 +178,36 @@ export class DiscordService extends EventEmitter {
         
       } catch (sdkError) {
         console.error('❌ Discord SDK error:', sdkError);
-        console.log('🔧 Falling back to demo mode due to Discord SDK failure');
-        await this.initializeDemoMode();
-        return true;
+        
+        // In production, don't fall back to demo mode - show error and retry
+        const isProduction = import.meta.env.PROD || window.location.hostname.includes('netlify.app') || window.location.hostname.includes('disconnect4');
+        if (isProduction) {
+          console.error('🚨 Production mode: Discord SDK failed, retrying in 3 seconds...');
+          setTimeout(() => {
+            console.log('🔄 Retrying Discord initialization...');
+            this.initialize();
+          }, 3000);
+          return false;
+        } else {
+          console.log('🔧 Development mode: Falling back to demo mode due to Discord SDK failure');
+          await this.initializeDemoMode();
+          return true;
+        }
       }
       
     } catch (error) {
       console.error('❌ DiscordService initialization failed:', error);
-      console.log('🔧 Falling back to demo mode due to initialization failure');
-      await this.initializeDemoMode();
-      return true;
+      
+      // In production, don't fall back to demo mode
+      const isProduction = import.meta.env.PROD || window.location.hostname.includes('netlify.app') || window.location.hostname.includes('disconnect4');
+      if (isProduction) {
+        console.error('🚨 Production mode: Initialization failed, will retry Discord authentication');
+        return false;
+      } else {
+        console.log('🔧 Development mode: Falling back to demo mode due to initialization failure');
+        await this.initializeDemoMode();
+        return true;
+      }
     }
   }
 
